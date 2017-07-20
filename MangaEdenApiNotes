@@ -1,0 +1,78 @@
+UI Inspiration https://www.youtube.com/watch?v=79-V1xYdlR0&t=43s
+
+
+<--------------------------------------------------------------------------------------------------------->
+
+Manga List
+
+https://www.mangaeden.com/api/list/[language]/
+https://www.mangaeden.com/api/list/0/
+
+
+[language] 	0 : english
+			1: italian
+
+The full json result is 6.4 mb
+
+ex:
+{
+      "a": "flower-dream", 														// alias
+      "c": [																	// category
+        "Action",
+        "Adventure",
+        "Drama",
+        "Sci-fi",
+        "Supernatural"
+      ],
+      "h": 1196, 																// hits
+      "i": "5372389645b9ef5a0b1d20d8", 										    // ID
+      "im": "ad/ad8dbe2c909de99899f1015a360f75e3ced31023672d6ff0d2b7547c.jpg",  // image
+      "ld": 1416420134.0, 														// last chapter date
+      "s": 2, 																    // status
+      "t": "Flower Dream"														// title
+    },
+
+<--------------------------------------------------------------------------------------------------------->
+
+Manga info and chapters list
+
+https://www.mangaeden.com/api/manga/[manga.id]/
+
+Note: boku no hero’s id = 541aabc045b9ef49009d69b6
+https://www.mangaeden.com/api/manga/541aabc045b9ef49009d69b6/
+
+	Chapter array element explained
+[
+143,											                                // Chapter number
+1498736263,									                                    // chapter’s date (epoch)
+"C’mon, Rappa, Let’s Have Ourselves a Match!!",		                            // chapter’s title
+"5954e687719a1640af7fe232"					                                    // chapter’s id
+],
+
+<--------------------------------------------------------------------------------------------------------->
+
+Chapter pages
+
+https://www.mangaeden.com/api/chapter/[chapter.id]/
+
+Note: chapter id from previous call = 5954e687719a1640af7fe232
+https://www.mangaeden.com/api/chapter/5954e687719a1640af7fe232/
+
+	Array element explained
+[
+18,																	            // page number
+"9b/9bb7ce63eca55502c6a0b54c6c43f3dc4eb100d6e11d57d2bd45e4ca.jpg",	            // image
+864,																	        // width dimension
+1250																	        // height dimension
+],
+
+<--------------------------------------------------------------------------------------------------------->
+
+To view image:
+https://cdn.mangaeden.com/mangasimg/[image url]
+
+ex. from previous call
+https://cdn.mangaeden.com/mangasimg/9b/9bb7ce63eca55502c6a0b54c6c43f3dc4eb100d6e11d57d2bd45e4ca.jpg
+
+
+
