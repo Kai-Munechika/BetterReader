@@ -18,7 +18,15 @@ public class ImageLoadingUtilities {
         String url = IMAGE_BASE_URL + suffix;
         Glide.with(context)
                 .load(url)
-                .placeholder(android.R.drawable.sym_def_app_icon)
+//                .placeholder(android.R.drawable.sym_def_app_icon)
+                .into(view);
+    }
+
+    public static void loadUrlIntoImageView(String suffix, ImageView view, Context context, int height, int width){
+        String url = IMAGE_BASE_URL + suffix;
+        Glide.with(context)
+                .load(url)
+                .override(width, height)
                 .into(view);
     }
 }

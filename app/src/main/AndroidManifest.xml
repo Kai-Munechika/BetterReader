@@ -18,7 +18,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".activities.ChapterViewingActivity">
+        <activity android:name=".activities.ChapterViewingActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">
         </activity>
         <activity android:name=".activities.MangaAndItsChaptersInfoActivity">
         </activity>
