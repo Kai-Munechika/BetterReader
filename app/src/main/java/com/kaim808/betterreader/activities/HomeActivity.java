@@ -13,7 +13,7 @@ public class HomeActivity extends AppCompatActivity {
     public static String SELECTED_CHAPTER = "selected_chapter";
 
     private static final String testMangaId = "541aabc045b9ef49009d69b6";
-    private static final String testChapterId = "59663b53719a1691aa1cec07";
+    private static final String testChapterId = "5970b931719a168178337a81";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
