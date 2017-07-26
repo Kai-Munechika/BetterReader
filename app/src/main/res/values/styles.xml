@@ -9,6 +9,11 @@
     </style>
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
     </style>
+
+    <style name="chapterSubtitleTextAppearance">
+        <item name="android:textSize">18.5sp</item>
+    </style>
+
     <!--<style name="Theme.AppCompat.Light.NoActionBar" parent="@style/Theme.AppCompat.Light">-->
         <!--<item name="windowNoTitle">true</item>-->
         <!--<item name="windowActionBar">false</item>-->

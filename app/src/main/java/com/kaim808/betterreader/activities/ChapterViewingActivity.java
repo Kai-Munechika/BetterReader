@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
+import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
@@ -31,8 +32,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 // TODO: 7/23/17 add space between pages in our ViewPager
-// TODO: 7/24/17 add app bar
-// TODO: 7/24/17 add bottom navigation ui
 
 
 public class ChapterViewingActivity extends AppCompatActivity {
@@ -58,7 +57,6 @@ public class ChapterViewingActivity extends AppCompatActivity {
         initializeActionBar();
 
         String chapterId = getIntent().getStringExtra(HomeActivity.SELECTED_CHAPTER);
-
         chapterCall(RetrofitSingleton.mangaEdenApiInterface, chapterId);
 
     }
@@ -108,7 +106,8 @@ public class ChapterViewingActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<Chapter> call, Throwable t) {
-                Toast.makeText(ChapterViewingActivity.this, "chapterCall onFailure", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ChapterViewingActivity.this, "Failure in chapterCall\n" + getString(R.string.networkError), Toast.LENGTH_SHORT).show();
+                ((ContentLoadingProgressBar) ChapterViewingActivity.this.findViewById(R.id.progress_bar)).hide();
             }
         });
     }
@@ -141,7 +140,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
         int keyCode = event.getKeyCode();
         int currentPageNum = mPager.getCurrentItem();
 
-        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN && mImageUrls != null) {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_VOLUME_UP:
                     gotoNextPage(currentPageNum);

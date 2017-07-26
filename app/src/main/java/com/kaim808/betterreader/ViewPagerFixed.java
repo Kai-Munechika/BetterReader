@@ -8,6 +8,7 @@ import android.view.MotionEvent;
  * Created by KaiM on 7/22/17.
  */
 
+// fixes the issue of app crashing from interaction with photoview zooming
 public class ViewPagerFixed extends android.support.v4.view.ViewPager {
 
     public ViewPagerFixed(Context context) {

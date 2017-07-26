@@ -14,7 +14,9 @@
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:subtitleTextAppearance="@style/chapterSubtitleTextAppearance"
+        />
 
 
     <com.kaim808.betterreader.ViewPagerFixed
@@ -23,6 +25,47 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
+
+    <android.support.v4.widget.ContentLoadingProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"/>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="73dp"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="@color/materialBackgroundLight"
+        app:cardCornerRadius="0dp"
+        >
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.25dp"
+            android:background="#d6d6d6" />
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp"/>
+        <TextView
+            android:id="@+id/progress_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="42dp"
+            android:textSize="16sp"
+            android:text="Page 46 of 105 ⋅ 42%"
+            />
+
+
+    </android.support.v7.widget.CardView>
 
 
 </FrameLayout>

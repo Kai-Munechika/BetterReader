@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">BetterReader</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="networkError">Please reconnect to the internet and try again</string>
 </resources>
