@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -12,6 +13,8 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kaim808.betterreader.MangaEdenApiInterface;
@@ -40,6 +43,10 @@ public class ChapterViewingActivity extends AppCompatActivity {
     ViewPagerFixed mPager;
     @BindView(R.id.chapter_viewing_toolbar)
     Toolbar mToolbar;
+    @BindView(R.id.page_seekbar)
+    SeekBar mPageSeekbar;
+    @BindView(R.id.progress_text_view)
+    TextView mProgressLabel;
 
     private PagerAdapter mPagerAdapter;
     private String[] mImageUrls;
@@ -55,12 +62,14 @@ public class ChapterViewingActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         initializeActionBar();
-
-        String chapterId = getIntent().getStringExtra(HomeActivity.SELECTED_CHAPTER);
-        chapterCall(RetrofitSingleton.mangaEdenApiInterface, chapterId);
+        initializeMainContent();
+        initializeBottomUI();
 
     }
 
+
+
+    /* Methods for initializing the UI */
     private void initializeActionBar() {
         mToolbar.setTitle(testTitle);
         mToolbar.setSubtitle(testSubtitle);
@@ -69,6 +78,77 @@ public class ChapterViewingActivity extends AppCompatActivity {
         // if I decide to use the up action, gotta declare the parent activity in the manifest
 //        ActionBar ab = getSupportActionBar();
 //        ab.setDisplayHomeAsUpEnabled(true);
+    }
+
+    private void initializeMainContent() {
+        String chapterId = getIntent().getStringExtra(HomeActivity.SELECTED_CHAPTER);
+        chapterCall(RetrofitSingleton.mangaEdenApiInterface, chapterId);
+    }
+
+    private void initializeBottomUI() {
+        mPageSeekbar.setEnabled(false);
+
+        // have the viewPager update when the seekbar's value changes
+        mPageSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            final String label = "Page %s of %s ⋅ %s%%";
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                /* implementation where we use seekbar.setMax(mImageUrls.length - 1 ) */
+                int numPages = mPagerAdapter.getCount();
+                int percentageRead = (int) ((((float) i + 1) / numPages) * 100);
+
+                String newLabel = String.format(label, i + 1, numPages,  String.valueOf(percentageRead));
+                mProgressLabel.setText(newLabel);
+                mPager.setCurrentItem(i);
+
+
+                // TODO: 7/26/17 figure this out ; implementation when we use seekbar.setMax(999) for the illusion of continuous thumb dragging
+//                // i is the current value the seekbar holds; [0, 999] - this is 1000 values
+//                // max = 999
+//                // numPages = 22
+//                /* implementation where we use seekbar.setMax(1000), to make the seekbar feel continuous */
+//                int seekbarMax = seekBar.getMax();
+//                int numPages = mPagerAdapter.getCount();
+//
+//                int percentageRead = (int) ((float)(i + 1) / seekbarMax * 100);
+//                int currentPageNum = (int) (((float) ((i+1)*numPages))/(seekbarMax + 1));
+//                String newLabel = String.format(label, currentPageNum + 1, numPages, percentageRead);
+//
+//                mProgressLabel.setText(newLabel);
+//                mPager.setCurrentItem(currentPageNum);
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        // have the seekbar update when the viewPager turns to a different page
+        mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                mPageSeekbar.setProgress(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
 
     @Override
@@ -91,6 +171,8 @@ public class ChapterViewingActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+    /* Methods for our http call */
     private void chapterCall(MangaEdenApiInterface apiInterface, String chapterId) {
         Call<Chapter> chapterPagesCall = apiInterface.getChapter(chapterId);
         chapterPagesCall.enqueue(new Callback<Chapter>() {
@@ -99,9 +181,12 @@ public class ChapterViewingActivity extends AppCompatActivity {
                 Chapter chapter = response.body();
 
                 mImageUrls = getImageUrls(chapter);
-                mImageUrls = reverseStringArray(mImageUrls);
                 mPagerAdapter = new ChapterPageAdapter(getSupportFragmentManager());
                 mPager.setAdapter(mPagerAdapter);
+
+                mPageSeekbar.setMax(mImageUrls.length - 1);
+//                mPageSeekbar.setMax(999);
+                mPageSeekbar.setEnabled(true);
             }
 
             @Override
@@ -120,7 +205,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
             imageUrls[i] = (getImageUrlSuffix(images, i));
         }
 
-        return imageUrls;
+        return reverseStringArray(imageUrls);
     }
 
     private String getImageUrlSuffix(List<List<String>> listList, int pageNumber) {
@@ -135,6 +220,8 @@ public class ChapterViewingActivity extends AppCompatActivity {
         return (String[]) strList.toArray();
     }
 
+
+    /* Methods for handling volume rocker presses */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         int keyCode = event.getKeyCode();
@@ -165,6 +252,8 @@ public class ChapterViewingActivity extends AppCompatActivity {
         }
     }
 
+
+    /* Adapter for our view pager */
     private class ChapterPageAdapter extends FragmentStatePagerAdapter {
 
         public ChapterPageAdapter(FragmentManager fm) {
