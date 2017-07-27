@@ -150,6 +150,10 @@ public class ChapterViewingActivity extends AppCompatActivity {
         });
     }
 
+    public void toggleUI() {
+        Toast.makeText(this, "toggle UI", Toast.LENGTH_SHORT).show();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
