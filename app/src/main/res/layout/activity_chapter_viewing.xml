@@ -17,6 +17,7 @@
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:subtitleTextAppearance="@style/chapterSubtitleTextAppearance"
+        tools:background="@color/colorAccent"
         />
 
 
