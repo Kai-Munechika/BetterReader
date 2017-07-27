@@ -68,7 +68,6 @@ public class ChapterViewingActivity extends AppCompatActivity {
     }
 
 
-
     /* Methods for initializing the UI */
     private void initializeActionBar() {
         mToolbar.setTitle(testTitle);
@@ -99,7 +98,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
                 int numPages = mPagerAdapter.getCount();
                 int percentageRead = (int) ((((float) i + 1) / numPages) * 100);
 
-                String newLabel = String.format(label, i + 1, numPages,  String.valueOf(percentageRead));
+                String newLabel = String.format(label, i + 1, numPages, String.valueOf(percentageRead));
                 mProgressLabel.setText(newLabel);
                 mPager.setCurrentItem(i);
 
@@ -236,7 +235,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
                     gotoPreviousPage(currentPageNum);
                     return true;
             }
-        }
+        } else if (event.getAction() == KeyEvent.ACTION_UP && mImageUrls != null) { return true; }
         return super.dispatchKeyEvent(event);
     }
 
@@ -270,7 +269,6 @@ public class ChapterViewingActivity extends AppCompatActivity {
             return mImageUrls.length;
         }
     }
-
 
 
 }
