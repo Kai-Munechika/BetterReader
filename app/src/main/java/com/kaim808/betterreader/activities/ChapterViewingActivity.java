@@ -1,5 +1,6 @@
 package com.kaim808.betterreader.activities;
 
+import android.animation.ObjectAnimator;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -8,11 +9,13 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +26,7 @@ import com.kaim808.betterreader.RetrofitSingleton;
 import com.kaim808.betterreader.ViewPagerFixed;
 import com.kaim808.betterreader.fragments.ChapterPageFragment;
 import com.kaim808.betterreader.pojos.Chapter;
+import com.kaim808.betterreader.utils.ViewMeasurementUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,9 +51,24 @@ public class ChapterViewingActivity extends AppCompatActivity {
     SeekBar mPageSeekbar;
     @BindView(R.id.progress_text_view)
     TextView mProgressLabel;
+    @BindView(R.id.bottom_ui_container)
+    CardView mBottomNavigationView;
 
     private PagerAdapter mPagerAdapter;
     private String[] mImageUrls;
+
+    private View mDecorView;
+    private final int SYSTEM_SHOW = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+
+    private final int SYSTEM_HIDE = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hideActivityUi nav bar
+            | View.SYSTEM_UI_FLAG_FULLSCREEN // hideActivityUi status bar
+            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+
 
     private static String testTitle = "Boku no Hero Academia 117";
     private static String testSubtitle = "C’mon, Rappa, Let’s Have Ourselves a Match!!";
@@ -64,11 +83,46 @@ public class ChapterViewingActivity extends AppCompatActivity {
         initializeActionBar();
         initializeMainContent();
         initializeBottomUI();
+        initializeSystemUi();
 
     }
 
+    /* Methods for initializing the system ui */
+    private void initializeSystemUi() {
+        // any view here works, as long as it's in the activity
+        mDecorView = getWindow().getDecorView();
+        mDecorView.setOnSystemUiVisibilityChangeListener
+                (new View.OnSystemUiVisibilityChangeListener() {
+                    @Override
+                    public void onSystemUiVisibilityChange(int visibility) {
+                        if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+                            // The system bars are visible
+                            showActivityUi();
+                        } else {
+                            // The system bars are NOT visible
+                            hideActivityUi();
+                        }
+                    }
+                });
 
-    /* Methods for initializing the UI */
+    }
+
+    public void toggleUI() {
+        if (mDecorView.getSystemUiVisibility() == SYSTEM_HIDE) {
+            showSystemUi();
+        } else {
+            hideSystemUi();
+        }    }
+
+    private void hideSystemUi() {
+        mDecorView.setSystemUiVisibility(SYSTEM_HIDE);
+    }
+
+    private void showSystemUi() {
+        mDecorView.setSystemUiVisibility(SYSTEM_SHOW);
+    }
+
+    /* Methods for initializing the Ui */
     private void initializeActionBar() {
         mToolbar.setTitle(testTitle);
         mToolbar.setSubtitle(testSubtitle);
@@ -150,8 +204,24 @@ public class ChapterViewingActivity extends AppCompatActivity {
         });
     }
 
-    public void toggleUI() {
-        Toast.makeText(this, "toggle UI", Toast.LENGTH_SHORT).show();
+    private void showActivityUi() {
+
+        ObjectAnimator showToolbarAnimator = ObjectAnimator.ofFloat(mToolbar, "translationY", ViewMeasurementUtils.getStatusBarHeight(this));
+        ObjectAnimator showBottomAnimator = ObjectAnimator.ofFloat(mBottomNavigationView, "translationY", -ViewMeasurementUtils.getNavigationBarHeight(this));
+
+        showToolbarAnimator.start();
+        showBottomAnimator.start();
+
+
+    }
+
+    private void hideActivityUi() {
+        ObjectAnimator hideToolbarAnimator = ObjectAnimator.ofFloat(mToolbar, "y", -(mToolbar.getY() + mToolbar.getHeight()));
+        ObjectAnimator hideBottomAnimator = ObjectAnimator.ofFloat(mBottomNavigationView, "translationY", ViewMeasurementUtils.getNavigationBarHeight(this) + mBottomNavigationView.getHeight());
+
+        hideToolbarAnimator.start();
+        hideBottomAnimator.start();
+
     }
 
     @Override
@@ -190,6 +260,8 @@ public class ChapterViewingActivity extends AppCompatActivity {
                 mPageSeekbar.setMax(mImageUrls.length - 1);
 //                mPageSeekbar.setMax(999);
                 mPageSeekbar.setEnabled(true);
+
+                hideSystemUi();
             }
 
             @Override
@@ -238,8 +310,12 @@ public class ChapterViewingActivity extends AppCompatActivity {
                 case KeyEvent.KEYCODE_VOLUME_DOWN:
                     gotoPreviousPage(currentPageNum);
                     return true;
+                case KeyEvent.KEYCODE_BACK:
+                    onBackPressed();
             }
-        } else if (event.getAction() == KeyEvent.ACTION_UP && mImageUrls != null) { return true; }
+        } else if (event.getAction() == KeyEvent.ACTION_UP && mImageUrls != null) {
+            return true;
+        }
         return super.dispatchKeyEvent(event);
     }
 
@@ -273,8 +349,6 @@ public class ChapterViewingActivity extends AppCompatActivity {
             return mImageUrls.length;
         }
     }
-
-
 }
 
 
