@@ -22,6 +22,7 @@ public class ImageLoadingUtilities {
         String url = IMAGE_BASE_URL + suffix;
         Glide.with(context)
                 .load(url)
+                .crossFade()
                 .into(view);
     }
 

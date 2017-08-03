@@ -38,8 +38,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-// TODO: 7/23/17 add space between pages in our ViewPager
-
 
 public class ChapterViewingActivity extends AppCompatActivity {
 
@@ -136,6 +134,10 @@ public class ChapterViewingActivity extends AppCompatActivity {
     private void initializeMainContent() {
         String chapterId = getIntent().getStringExtra(HomeActivity.SELECTED_CHAPTER);
         chapterCall(RetrofitSingleton.mangaEdenApiInterface, chapterId);
+
+        // insert space between pages
+        int margin = 32;
+        mPager.setPageMargin(margin);
     }
 
     private void initializeBottomUI() {
