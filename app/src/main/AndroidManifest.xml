@@ -11,6 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
+
         <activity android:name=".activities.HomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -18,12 +19,23 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <!--android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">-->
-        <activity android:name=".activities.ChapterViewingActivity"
-                    android:theme="@style/AppTheme.NoActionBar">
-    </activity>
-        <activity android:name=".activities.MangaAndItsChaptersInfoActivity">
+
+        <activity
+            android:name=".activities.MangaAndItsChaptersInfoActivity"
+            android:parentActivityName=".activities.HomeActivity"
+            >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.HomeActivity"/>
         </activity>
+
+        <!--android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">-->
+        <activity
+            android:name=".activities.ChapterViewingActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+
+
     </application>
 
 </manifest>

@@ -25,6 +25,12 @@ public class ImageLoadingUtilities {
                 .crossFade()
                 .into(view);
     }
+    public static void loadExactUrlIntoImageView(String url, ImageView view, Context context) {
+        Glide.with(context)
+                .load(url)
+                .crossFade()
+                .into(view);
+    }
 
     public static void loadUrlIntoImageViewAndSetProgressbarVisibility(String suffix, ImageView view, final Context context, final ContentLoadingProgressBar progressBar) {
         String url = IMAGE_BASE_URL + suffix;
