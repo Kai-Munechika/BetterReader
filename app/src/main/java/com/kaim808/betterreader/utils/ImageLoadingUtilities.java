@@ -20,10 +20,7 @@ public class ImageLoadingUtilities {
     // this is a utility method; should be used in many activities
     public static void loadUrlIntoImageView(String suffix, ImageView view, Context context){
         String url = IMAGE_BASE_URL + suffix;
-        Glide.with(context)
-                .load(url)
-                .crossFade()
-                .into(view);
+        loadExactUrlIntoImageView(url, view, context);
     }
     public static void loadExactUrlIntoImageView(String url, ImageView view, Context context) {
         Glide.with(context)

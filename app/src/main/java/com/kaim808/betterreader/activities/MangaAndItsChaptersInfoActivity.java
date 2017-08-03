@@ -39,30 +39,32 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_manga_and_its_chapters_info);
         ButterKnife.bind(this);
 
-        String mangaImageUrl = getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_IMAGE_URL);
-        ImageLoadingUtilities.loadUrlIntoImageView(mangaImageUrl, mImageBanner, this);
-
         initializeUi();
-
-
     }
 
     private void initializeUi() {
+        // manga image
+        String mangaImageUrl = getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_IMAGE_URL);
+        ImageLoadingUtilities.loadUrlIntoImageView(mangaImageUrl, mImageBanner, this);
+
+        // manga title
         mToolbar.setTitle(getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_NAME));
+        mCollapsingToolbarLayout.setExpandedTitleColor(Color.TRANSPARENT);
+
+        // adjusting to status bar height, so we don't have the toolbar behind the status bar
         CollapsingToolbarLayout.LayoutParams layoutParams = (CollapsingToolbarLayout.LayoutParams) mToolbar.getLayoutParams();
         layoutParams.setMargins(0, ViewMeasurementUtils.getStatusBarHeight(this), 0, 0);
         mToolbar.setLayoutParams(layoutParams);
+        setStatusBarTranslucent(true);
 
-        mCollapsingToolbarLayout.setExpandedTitleColor(Color.TRANSPARENT);
-
-
+        // enabling up navigation
         setSupportActionBar(mToolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             Drawable drawable = mToolbar.getNavigationIcon();
             drawable.setColorFilter(ContextCompat.getColor(this, R.color.black), PorterDuff.Mode.SRC_ATOP);
         }
-        setStatusBarTranslucent(true);
+
     }
 
     private void mangaAndChapters(final MangaEdenApiInterface apiInterface, String mangaId) {
@@ -84,22 +86,6 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
             }
         });
     }
-
-    // not gonna need this since we're gonna iterate through the whole thing anyway
-//    /* where n starts at 0 */
-//    private String getNthChapterId(MangaAndItsChapters mangaAndItsChapters, int n) {
-//        final int CHAPTER_ID_INDEX = 3;
-//        int numChapters = mangaAndItsChapters.getChapters().size();
-//        if (n >= numChapters) {
-//            return null;
-//        }
-//
-//        // note, the chapters are in reverse order; newest on top, oldest at the bottom
-//        int nthIndex = numChapters - n - 1;
-//
-//        String chapterId = mangaAndItsChapters.getChapters().get(nthIndex).get(CHAPTER_ID_INDEX);
-//        return chapterId;
-//    }
 
     protected void setStatusBarTranslucent(boolean makeTranslucent) {
         if (makeTranslucent) {
