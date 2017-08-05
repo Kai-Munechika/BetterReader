@@ -2,4 +2,8 @@
     <string name="app_name">BetterReader</string>
 
     <string name="networkError">Please reconnect to the internet and try again</string>
+    <string name="collapse_label">Collapse</string>
+    <string name="expand_label">Expand</string>
+    <string name="ongoing">Ongoing</string>
+    <string name="completed">Completed</string>
 </resources>

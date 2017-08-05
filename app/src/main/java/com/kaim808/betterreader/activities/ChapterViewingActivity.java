@@ -132,7 +132,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
     }
 
     private void initializeMainContent() {
-        String chapterId = getIntent().getStringExtra(HomeActivity.SELECTED_CHAPTER);
+        String chapterId = getIntent().getStringExtra(HomeActivity.SELECTED_CHAPTER_ID);
         chapterCall(RetrofitSingleton.mangaEdenApiInterface, chapterId);
 
         // insert space between pages

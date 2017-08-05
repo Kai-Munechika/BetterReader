@@ -7,13 +7,19 @@ import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kaim808.betterreader.MangaEdenApiInterface;
 import com.kaim808.betterreader.R;
+import com.kaim808.betterreader.RetrofitSingleton;
 import com.kaim808.betterreader.pojos.MangaAndItsChapters;
 import com.kaim808.betterreader.utils.ImageLoadingUtilities;
 import com.kaim808.betterreader.utils.ViewMeasurementUtils;
@@ -24,14 +30,37 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+// TODO: 8/3/17 blur banner image
+// TODO: 8/3/17 animate expansion/collapse of description
+
 public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
 
     @BindView(R.id.image_banner)
     ImageView mImageBanner;
+    @BindView(R.id.full_poster_image)
+    ImageView mPosterImage;
+
     @BindView(R.id.manga_info_toolbar)
     Toolbar mToolbar;
     @BindView(R.id.collapsing_toolbar_layout)
     CollapsingToolbarLayout mCollapsingToolbarLayout;
+
+    @BindView(R.id.title_label)
+    TextView mTitle;
+    @BindView(R.id.categories_label)
+    TextView mCategories;
+    @BindView(R.id.status_label)
+    TextView mStatus;
+    @BindView(R.id.view_count_label)
+    TextView mViewCount;
+
+    @BindView(R.id.description)
+    TextView mDescription;
+    @BindView(R.id.progress_bar)
+    ProgressBar mProgressBar;
+
+    @BindView(R.id.chapters_recycler_view)
+    RecyclerView mChaptersRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,16 +69,30 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         initializeUi();
+        mangaAndChapters(RetrofitSingleton.mangaEdenApiInterface, getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_ID));
     }
 
     private void initializeUi() {
         // manga image
         String mangaImageUrl = getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_IMAGE_URL);
         ImageLoadingUtilities.loadUrlIntoImageView(mangaImageUrl, mImageBanner, this);
+        ImageLoadingUtilities.loadUrlIntoImageView(mangaImageUrl, mPosterImage, this);
 
         // manga title
-        mToolbar.setTitle(getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_NAME));
+        String title = getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_NAME);
+        mToolbar.setTitle(title);
+        mTitle.setText(title);
         mCollapsingToolbarLayout.setExpandedTitleColor(Color.TRANSPARENT);
+
+        // categories
+        mCategories.setText(getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_CATEGORIES));
+
+        // status
+        mStatus.setText(getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_STATUS));
+
+        // views(hits)
+        mViewCount.setText(getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_VIEWS));
+
 
         // adjusting to status bar height, so we don't have the toolbar behind the status bar
         CollapsingToolbarLayout.LayoutParams layoutParams = (CollapsingToolbarLayout.LayoutParams) mToolbar.getLayoutParams();
@@ -66,7 +109,15 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         }
 
     }
+    protected void setStatusBarTranslucent(boolean makeTranslucent) {
+        if (makeTranslucent) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
+    }
 
+    // use the api call to get the chapters, description
     private void mangaAndChapters(final MangaEdenApiInterface apiInterface, String mangaId) {
 
         Call<MangaAndItsChapters> mangaAndChapters = apiInterface.getMangaAndChapters(mangaId);
@@ -75,6 +126,13 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<MangaAndItsChapters> call, Response<MangaAndItsChapters> response) {
                 MangaAndItsChapters mangaAndItsChapters = response.body();
+
+                String description = mangaAndItsChapters.getDescription();
+                if (description == null || description.length() == 0) {
+                    description = "No description available\n";
+                }
+                mDescription.setText(description);
+                mProgressBar.setVisibility(View.INVISIBLE);
 
                 // iterate over all chapters to populate recycler view showing info for each chapter
 
@@ -87,12 +145,15 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         });
     }
 
-    protected void setStatusBarTranslucent(boolean makeTranslucent) {
-        if (makeTranslucent) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+    public void toggleDescription(View view) {
+        int maxLines = mDescription.getMaxLines();
+        if (maxLines == 3) {
+            mDescription.setMaxLines(mDescription.getLineCount());
+            ((Button) view).setText(R.string.collapse_label);
         } else {
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            mDescription.setMaxLines(3);
+            ((Button) view).setText(R.string.expand_label);
         }
     }
-
 }
