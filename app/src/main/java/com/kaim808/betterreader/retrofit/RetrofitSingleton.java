@@ -1,4 +1,4 @@
-package com.kaim808.betterreader;
+package com.kaim808.betterreader.retrofit;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

@@ -1,6 +1,6 @@
-package com.kaim808.betterreader;
+package com.kaim808.betterreader.retrofit;
 
-import com.kaim808.betterreader.pojos.Chapter;
+import com.kaim808.betterreader.pojos.ChapterPages;
 import com.kaim808.betterreader.pojos.MangaAndItsChapters;
 
 import retrofit2.Call;
@@ -25,6 +25,6 @@ public interface MangaEdenApiInterface {
     Call<MangaAndItsChapters> getMangaAndChapters(@Path("mangaId") String mangaId);
 
     @GET("chapter/{chapterId}")
-    Call<Chapter> getChapter(@Path("chapterId") String chapterId);
+    Call<ChapterPages> getChapter(@Path("chapterId") String chapterId);
 
 }

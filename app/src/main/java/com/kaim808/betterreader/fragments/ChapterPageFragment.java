@@ -25,16 +25,15 @@ public class ChapterPageFragment extends Fragment implements OnViewTapListener {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_screen_slide_page, container, false);
 
-
         ImageView pageContainer = (ImageView) rootView.findViewById(R.id.chapter_page_view);
         ContentLoadingProgressBar progressBar = (ContentLoadingProgressBar) getActivity().findViewById(R.id.progress_bar);
+
+        String url = getArguments().getString(PAGE_IMAGE_URL);
+        ImageLoadingUtilities.loadUrlIntoImageViewAndSetProgressbarVisibility(url, pageContainer, getActivity(), progressBar);
 
         PhotoViewAttacher mAttacher = new PhotoViewAttacher(pageContainer);
         mAttacher.setOnViewTapListener(this);
 
-        String url = getArguments().getString(PAGE_IMAGE_URL);
-
-        ImageLoadingUtilities.loadUrlIntoImageViewAndSetProgressbarVisibility(url, pageContainer, getActivity(), progressBar);
         return rootView;
     }
 

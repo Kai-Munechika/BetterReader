@@ -20,12 +20,12 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.kaim808.betterreader.MangaEdenApiInterface;
+import com.kaim808.betterreader.retrofit.MangaEdenApiInterface;
 import com.kaim808.betterreader.R;
-import com.kaim808.betterreader.RetrofitSingleton;
-import com.kaim808.betterreader.ViewPagerFixed;
+import com.kaim808.betterreader.retrofit.RetrofitSingleton;
+import com.kaim808.betterreader.ui.ViewPagerFixed;
 import com.kaim808.betterreader.fragments.ChapterPageFragment;
-import com.kaim808.betterreader.pojos.Chapter;
+import com.kaim808.betterreader.pojos.ChapterPages;
 import com.kaim808.betterreader.utils.ViewMeasurementUtils;
 
 import java.util.Arrays;
@@ -38,7 +38,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-
+// TODO: 8/6/17 figure out how to toggle ui while image is loading
 public class ChapterViewingActivity extends AppCompatActivity {
 
     @BindView(R.id.view_pager)
@@ -133,7 +133,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
 
     private void initializeMainContent() {
         String chapterId = getIntent().getStringExtra(HomeActivity.SELECTED_CHAPTER_ID);
-        chapterCall(RetrofitSingleton.mangaEdenApiInterface, chapterId);
+        makeChapterCall(RetrofitSingleton.mangaEdenApiInterface, chapterId);
 
         // insert space between pages
         int margin = 32;
@@ -157,22 +157,6 @@ public class ChapterViewingActivity extends AppCompatActivity {
                 String newLabel = String.format(label, i + 1, numPages, String.valueOf(percentageRead));
                 mProgressLabel.setText(newLabel);
                 mPager.setCurrentItem(i);
-
-
-                // TODO: 7/26/17 figure this out ; implementation when we use seekbar.setMax(999) for the illusion of continuous thumb dragging
-//                // i is the current value the seekbar holds; [0, 999] - this is 1000 values
-//                // max = 999
-//                // numPages = 22
-//                /* implementation where we use seekbar.setMax(1000), to make the seekbar feel continuous */
-//                int seekbarMax = seekBar.getMax();
-//                int numPages = mPagerAdapter.getCount();
-//
-//                int percentageRead = (int) ((float)(i + 1) / seekbarMax * 100);
-//                int currentPageNum = (int) (((float) ((i+1)*numPages))/(seekbarMax + 1));
-//                String newLabel = String.format(label, currentPageNum + 1, numPages, percentageRead);
-//
-//                mProgressLabel.setText(newLabel);
-//                mPager.setCurrentItem(currentPageNum);
 
             }
 
@@ -248,33 +232,32 @@ public class ChapterViewingActivity extends AppCompatActivity {
 
 
     /* Methods for our http call */
-    private void chapterCall(MangaEdenApiInterface apiInterface, String chapterId) {
-        Call<Chapter> chapterPagesCall = apiInterface.getChapter(chapterId);
-        chapterPagesCall.enqueue(new Callback<Chapter>() {
+    private void makeChapterCall(MangaEdenApiInterface apiInterface, String chapterId) {
+        Call<ChapterPages> chapterPagesCall = apiInterface.getChapter(chapterId);
+        chapterPagesCall.enqueue(new Callback<ChapterPages>() {
             @Override
-            public void onResponse(Call<Chapter> call, Response<Chapter> response) {
-                Chapter chapter = response.body();
+            public void onResponse(Call<ChapterPages> call, Response<ChapterPages> response) {
+                ChapterPages chapterPages = response.body();
 
-                mImageUrls = getImageUrls(chapter);
+                mImageUrls = getImageUrls(chapterPages);
                 mPagerAdapter = new ChapterPageAdapter(getSupportFragmentManager());
                 mPager.setAdapter(mPagerAdapter);
 
                 mPageSeekbar.setMax(mImageUrls.length - 1);
-//                mPageSeekbar.setMax(999);
                 mPageSeekbar.setEnabled(true);
 
                 hideSystemUi();
             }
 
             @Override
-            public void onFailure(Call<Chapter> call, Throwable t) {
-                Toast.makeText(ChapterViewingActivity.this, "Failure in chapterCall\n" + getString(R.string.networkError), Toast.LENGTH_SHORT).show();
+            public void onFailure(Call<ChapterPages> call, Throwable t) {
+                Toast.makeText(ChapterViewingActivity.this, "Failure in makeChapterCall\n" + getString(R.string.networkError), Toast.LENGTH_SHORT).show();
                 ((ContentLoadingProgressBar) ChapterViewingActivity.this.findViewById(R.id.progress_bar)).hide();
             }
         });
     }
 
-    private String[] getImageUrls(Chapter chapter) {
+    private String[] getImageUrls(ChapterPages chapter) {
         List<List<String>> images = chapter.getImages();
         String[] imageUrls = new String[images.size()];
 

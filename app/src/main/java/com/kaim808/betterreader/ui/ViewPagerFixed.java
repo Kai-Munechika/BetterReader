@@ -1,4 +1,4 @@
-package com.kaim808.betterreader;
+package com.kaim808.betterreader.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;

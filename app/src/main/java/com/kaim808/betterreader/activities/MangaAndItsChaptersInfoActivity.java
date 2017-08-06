@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -17,10 +18,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.kaim808.betterreader.MangaEdenApiInterface;
+import com.kaim808.betterreader.ChapterMetaDataAdapter;
 import com.kaim808.betterreader.R;
-import com.kaim808.betterreader.RetrofitSingleton;
+import com.kaim808.betterreader.pojos.ChapterMetaData;
 import com.kaim808.betterreader.pojos.MangaAndItsChapters;
+import com.kaim808.betterreader.retrofit.MangaEdenApiInterface;
+import com.kaim808.betterreader.retrofit.RetrofitSingleton;
 import com.kaim808.betterreader.utils.ImageLoadingUtilities;
 import com.kaim808.betterreader.utils.ViewMeasurementUtils;
 
@@ -32,6 +35,9 @@ import retrofit2.Response;
 
 // TODO: 8/3/17 blur banner image
 // TODO: 8/3/17 animate expansion/collapse of description
+// TODO: 8/6/17 wire up recyclerview touches to viewing that actual chapter
+// TODO: 8/6/17 add animation to recyclerview item touches
+// TODO: 8/6/17 try to somehow optimize performance
 
 public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
 
@@ -53,11 +59,16 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
     TextView mStatus;
     @BindView(R.id.view_count_label)
     TextView mViewCount;
+    @BindView(R.id.top_divider)
+    View mDivider;
 
     @BindView(R.id.description)
     TextView mDescription;
     @BindView(R.id.progress_bar)
     ProgressBar mProgressBar;
+    @BindView(R.id.description_toggle)
+    Button mDescriptionToggleButton;
+
 
     @BindView(R.id.chapters_recycler_view)
     RecyclerView mChaptersRecyclerView;
@@ -69,7 +80,7 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         initializeUi();
-        mangaAndChapters(RetrofitSingleton.mangaEdenApiInterface, getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_ID));
+        makeMangaAndChaptersCall(RetrofitSingleton.mangaEdenApiInterface, getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_ID));
     }
 
     private void initializeUi() {
@@ -118,31 +129,50 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
     }
 
     // use the api call to get the chapters, description
-    private void mangaAndChapters(final MangaEdenApiInterface apiInterface, String mangaId) {
+    private void makeMangaAndChaptersCall(final MangaEdenApiInterface apiInterface, String mangaId) {
 
-        Call<MangaAndItsChapters> mangaAndChapters = apiInterface.getMangaAndChapters(mangaId);
+        final Call<MangaAndItsChapters> getMangaAndChaptersCall = apiInterface.getMangaAndChapters(mangaId);
 
-        mangaAndChapters.enqueue(new Callback<MangaAndItsChapters>() {
+        getMangaAndChaptersCall.enqueue(new Callback<MangaAndItsChapters>() {
             @Override
             public void onResponse(Call<MangaAndItsChapters> call, Response<MangaAndItsChapters> response) {
                 MangaAndItsChapters mangaAndItsChapters = response.body();
 
-                String description = mangaAndItsChapters.getDescription();
-                if (description == null || description.length() == 0) {
-                    description = "No description available\n";
-                }
-                mDescription.setText(description);
-                mProgressBar.setVisibility(View.INVISIBLE);
-
-                // iterate over all chapters to populate recycler view showing info for each chapter
+                updateDescription(mangaAndItsChapters);
+                toggleVisibilities();
+                updateRecyclerView(mangaAndItsChapters);
 
             }
 
             @Override
             public void onFailure(Call<MangaAndItsChapters> call, Throwable t) {
-                Toast.makeText(MangaAndItsChaptersInfoActivity.this, "mangaAndChapters onFailure", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MangaAndItsChaptersInfoActivity.this, "makeMangaAndChaptersCall onFailure", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void updateDescription(MangaAndItsChapters mangaAndItsChapters) {
+        String description = mangaAndItsChapters.getDescription();
+        if (description == null || description.length() == 0) {
+            description = "No description available\n";
+        }
+        mDescription.setText(description);
+        mDescriptionToggleButton.setVisibility(View.INVISIBLE);
+    }
+
+    private void toggleVisibilities() {
+        mProgressBar.setVisibility(View.INVISIBLE);
+        mDescriptionToggleButton.setVisibility(View.VISIBLE);
+        mDivider.setVisibility(View.VISIBLE);
+    }
+
+    private void updateRecyclerView(MangaAndItsChapters mangaAndItsChapters) {
+        ChapterMetaData chapterMetaData = new ChapterMetaData(mangaAndItsChapters.getChapters());
+        ChapterMetaDataAdapter adapter = new ChapterMetaDataAdapter(chapterMetaData);
+        mChaptersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mChaptersRecyclerView.setAdapter(adapter);
+        mChaptersRecyclerView.setNestedScrollingEnabled(false);
+        mChaptersRecyclerView.setMinimumHeight(this.getResources().getDimensionPixelSize(R.dimen.rowHeight)*chapterMetaData.size());
     }
 
 
