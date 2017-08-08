@@ -9,6 +9,7 @@
 
     <color name="materialBackgroundLight">#f5f5f5</color>
     <color name="materialBackground">#fafafa</color>
+    <color name="materialBackground2">#ededed</color>
     <color name="transparent">#00000000</color>
     <color name="defaultTextColor">#727272</color>
 
