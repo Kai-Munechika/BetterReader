@@ -20,12 +20,12 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.kaim808.betterreader.retrofit.MangaEdenApiInterface;
 import com.kaim808.betterreader.R;
-import com.kaim808.betterreader.retrofit.RetrofitSingleton;
-import com.kaim808.betterreader.ui.ViewPagerFixed;
 import com.kaim808.betterreader.fragments.ChapterPageFragment;
 import com.kaim808.betterreader.pojos.ChapterPages;
+import com.kaim808.betterreader.retrofit.MangaEdenApiInterface;
+import com.kaim808.betterreader.retrofit.RetrofitSingleton;
+import com.kaim808.betterreader.ui.ViewPagerFixed;
 import com.kaim808.betterreader.utils.ViewMeasurementUtils;
 
 import java.util.Arrays;
@@ -39,7 +39,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 // TODO: 8/6/17 figure out how to toggle ui while image is loading
-// TODO: 8/8/17 add a progressbar to each page rather than 1 for the whole activity
 // TODO: 8/8/17 next/previous chapter if they try to go to next page at either end
 public class ChapterViewingActivity extends AppCompatActivity {
 
@@ -242,6 +241,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
                 mImageUrls = getImageUrls(chapterPages);
                 mPagerAdapter = new ChapterPageAdapter(getSupportFragmentManager());
                 mPager.setAdapter(mPagerAdapter);
+                mPager.setOffscreenPageLimit(1);
 
                 mPageSeekbar.setMax(mImageUrls.length - 1);
                 mPageSeekbar.setEnabled(true);

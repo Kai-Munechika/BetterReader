@@ -26,7 +26,7 @@ public class ChapterPageFragment extends Fragment implements OnViewTapListener {
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_screen_slide_page, container, false);
 
         ImageView pageContainer = (ImageView) rootView.findViewById(R.id.chapter_page_view);
-        ContentLoadingProgressBar progressBar = (ContentLoadingProgressBar) getActivity().findViewById(R.id.progress_bar);
+        ContentLoadingProgressBar progressBar = (ContentLoadingProgressBar) rootView.findViewById(R.id.progress_bar);
 
         String url = getArguments().getString(PAGE_IMAGE_URL);
         ImageLoadingUtilities.loadUrlIntoImageViewAndSetProgressbarVisibility(url, pageContainer, getActivity(), progressBar);
