@@ -3,4 +3,5 @@
     <dimen name="rowHeight">80dp</dimen>
     <dimen name="mangaDetailsStartMargin">10dp</dimen>
     <dimen name="posterImageStartMargin">8dp</dimen>
+    <dimen name="mangaDetailsEndMargin">10dp</dimen>
 </resources>

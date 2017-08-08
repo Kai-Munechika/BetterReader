@@ -30,7 +30,7 @@ public class ChapterMetaDataAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private Context mContext;
 
     private int mProgressBarVisibility = View.VISIBLE;
-    private int mToggleButtonVisibility = View.INVISIBLE;
+    private int mDescriptionButtonVisibility = View.INVISIBLE;
 
     public ChapterMetaDataAdapter(MangaDetails mangaDetails, Context context) {
         mChapterData = null;
@@ -44,7 +44,7 @@ public class ChapterMetaDataAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     public void updateUiFlags() {
         mProgressBarVisibility = View.GONE;
-        mToggleButtonVisibility = View.VISIBLE;
+        mDescriptionButtonVisibility = View.VISIBLE;
     }
 
 
@@ -55,8 +55,7 @@ public class ChapterMetaDataAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         if (viewType == TYPE_ITEM) {
             View chapterRow = inflater.inflate(R.layout.chapter_row, parent, false);
             return new VHItem(chapterRow);
-        }
-        else if (viewType == TYPE_HEADER) {
+        } else if (viewType == TYPE_HEADER) {
             View chapterHeader = inflater.inflate(R.layout.chapter_recycler_header, parent, false);
             return new VHHeader(chapterHeader);
         }
@@ -73,8 +72,7 @@ public class ChapterMetaDataAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 //        int currentProgress = 40;
 //        holder.progressBar.setMax(maxProgress);
 //        holder.progressBar.setProgress(currentProgress);
-        }
-        else if (holder instanceof  VHHeader) {
+        } else if (holder instanceof VHHeader) {
             ImageLoadingUtilities.loadUrlIntoImageView(mMangaDetails.getImageUrl(), ((VHHeader) holder).fullPosterImage, mContext);
             ((VHHeader) holder).titleLabel.setText(mMangaDetails.getTitle());
             ((VHHeader) holder).categories.setText(mMangaDetails.getCategories());
@@ -82,7 +80,7 @@ public class ChapterMetaDataAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             ((VHHeader) holder).views.setText(mMangaDetails.getViews());
 
             ((VHHeader) holder).progressBar.setVisibility(mProgressBarVisibility);
-            ((VHHeader) holder).descriptionButton.setVisibility(mToggleButtonVisibility);
+            ((VHHeader) holder).descriptionButton.setVisibility(mDescriptionButtonVisibility);
 
             final TextView description = ((VHHeader) holder).description;
             description.setText(mMangaDetails.getDescription());
@@ -101,7 +99,6 @@ public class ChapterMetaDataAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 }
             });
         }
-
     }
 
     @Override
@@ -138,6 +135,7 @@ public class ChapterMetaDataAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         TextView description;
         Button descriptionButton;
         ProgressBar progressBar;
+        View divider;
 
         VHHeader(View itemView) {
             super(itemView);
@@ -150,6 +148,7 @@ public class ChapterMetaDataAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             description = (TextView) itemView.findViewById(R.id.description);
             descriptionButton = (Button) itemView.findViewById(R.id.description_toggle);
             progressBar = (ProgressBar) itemView.findViewById(R.id.progress_bar);
+            divider = itemView.findViewById(R.id.top_divider);
 
         }
     }
