@@ -55,34 +55,32 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_manga_and_its_chapters_info);
         ButterKnife.bind(this);
 
+        mMangaDetails = getMangaDetails();
+
         initializeUi();
         makeMangaAndChaptersCall(RetrofitSingleton.mangaEdenApiInterface, getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_ID));
     }
 
+    /* UI related */
     private void initializeUi() {
-        mMangaDetails = getMangaDetails();
         ImageLoadingUtilities.loadUrlIntoImageView(mMangaDetails.getImageUrl(), mImageBanner, this);
-        mCollapsingToolbarLayout.setTitle(getMangaDetails().getTitle());
+        setupToolbarTitle();
+        moveLayoutBelowStatusBar();
+        setStatusBarTranslucent(true);
+        enableUpNavigation();
         initializeRecyclerView();
+    }
 
-
+    private void setupToolbarTitle() {
+        mToolbar.setTitle(getMangaDetails().getTitle());
         // hide title when expanded
         mCollapsingToolbarLayout.setExpandedTitleColor(Color.TRANSPARENT);
+    }
 
-        // adjusting to status bar height, so we don't have the toolbar behind the status bar
+    private void moveLayoutBelowStatusBar() {
         CollapsingToolbarLayout.LayoutParams layoutParams = (CollapsingToolbarLayout.LayoutParams) mToolbar.getLayoutParams();
         layoutParams.setMargins(0, ViewMeasurementUtils.getStatusBarHeight(this), 0, 0);
         mToolbar.setLayoutParams(layoutParams);
-        setStatusBarTranslucent(true);
-
-        // enabling up navigation
-        setSupportActionBar(mToolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            Drawable drawable = mToolbar.getNavigationIcon();
-            drawable.setColorFilter(ContextCompat.getColor(this, R.color.black), PorterDuff.Mode.SRC_ATOP);
-        }
-
     }
 
     protected void setStatusBarTranslucent(boolean makeTranslucent) {
@@ -90,6 +88,15 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         } else {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
+    }
+
+    private void enableUpNavigation() {
+        setSupportActionBar(mToolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            Drawable drawable = mToolbar.getNavigationIcon();
+            drawable.setColorFilter(ContextCompat.getColor(this, R.color.black), PorterDuff.Mode.SRC_ATOP);
         }
     }
 
@@ -116,6 +123,7 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         });
     }
 
+    /* data model related */
     private String getDescription(MangaAndItsChapters mangaAndItsChapters) {
         String description = mangaAndItsChapters.getDescription();
         if (description == null || description.length() == 0) {
@@ -124,16 +132,17 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         return description;
     }
 
-    private void updateRecyclerView(MangaAndItsChapters mangaAndItsChapters) {
-        ChapterMetaData chapterMetaData = new ChapterMetaData(mangaAndItsChapters.getChapters());
-        mDataAdapter.setChapterData(chapterMetaData);
-        mDataAdapter.notifyDataSetChanged();
-    }
     private void initializeRecyclerView() {
         mDataAdapter = new ChapterMetaDataAdapter(mMangaDetails, this);
         mChaptersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mChaptersRecyclerView.setAdapter(mDataAdapter);
         mChaptersRecyclerView.setNestedScrollingEnabled(true);
+    }
+
+    private void updateRecyclerView(MangaAndItsChapters mangaAndItsChapters) {
+        ChapterMetaData chapterMetaData = new ChapterMetaData(mangaAndItsChapters.getChapters());
+        mDataAdapter.setChapterData(chapterMetaData);
+        mDataAdapter.notifyDataSetChanged();
     }
 
     private MangaDetails getMangaDetails() {
