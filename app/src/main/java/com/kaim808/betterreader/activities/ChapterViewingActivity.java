@@ -39,6 +39,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 // TODO: 8/6/17 figure out how to toggle ui while image is loading
+// TODO: 8/8/17 add a progressbar to each page rather than 1 for the whole activity
+// TODO: 8/8/17 next/previous chapter if they try to go to next page at either end
 public class ChapterViewingActivity extends AppCompatActivity {
 
     @BindView(R.id.view_pager)
@@ -68,8 +70,6 @@ public class ChapterViewingActivity extends AppCompatActivity {
             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 
 
-    private static String testTitle = "Boku no Hero Academia 117";
-    private static String testSubtitle = "C’mon, Rappa, Let’s Have Ourselves a Match!!";
 
 
     @Override
@@ -122,8 +122,8 @@ public class ChapterViewingActivity extends AppCompatActivity {
 
     /* Methods for initializing the Ui */
     private void initializeActionBar() {
-        mToolbar.setTitle(testTitle);
-        mToolbar.setSubtitle(testSubtitle);
+        mToolbar.setTitle(getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_NAME));
+        mToolbar.setSubtitle(getIntent().getStringExtra(MangaAndItsChaptersInfoActivity.SELECTED_CHAPTER_SUBTITLE));
         setSupportActionBar(mToolbar);
 
         // if I decide to use the up action, gotta declare the parent activity in the manifest
@@ -132,7 +132,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
     }
 
     private void initializeMainContent() {
-        String chapterId = getIntent().getStringExtra(HomeActivity.SELECTED_CHAPTER_ID);
+        String chapterId = getIntent().getStringExtra(MangaAndItsChaptersInfoActivity.SELECTED_CHAPTER_ID);
         makeChapterCall(RetrofitSingleton.mangaEdenApiInterface, chapterId);
 
         // insert space between pages

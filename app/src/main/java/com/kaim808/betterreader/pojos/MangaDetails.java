@@ -29,7 +29,7 @@ public class MangaDetails {
         this.imageUrl = imageUrl;
     }
 
-    public String getTitle() {
+    public String getMangaName() {
         return title;
     }
 

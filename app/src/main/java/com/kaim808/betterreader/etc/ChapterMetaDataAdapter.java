@@ -1,4 +1,4 @@
-package com.kaim808.betterreader;
+package com.kaim808.betterreader.etc;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.kaim808.betterreader.R;
 import com.kaim808.betterreader.pojos.ChapterMetaData;
 import com.kaim808.betterreader.pojos.MangaDetails;
 import com.kaim808.betterreader.utils.ImageLoadingUtilities;
@@ -74,7 +75,7 @@ public class ChapterMetaDataAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 //        holder.progressBar.setProgress(currentProgress);
         } else if (holder instanceof VHHeader) {
             ImageLoadingUtilities.loadUrlIntoImageView(mMangaDetails.getImageUrl(), ((VHHeader) holder).fullPosterImage, mContext);
-            ((VHHeader) holder).titleLabel.setText(mMangaDetails.getTitle());
+            ((VHHeader) holder).titleLabel.setText(mMangaDetails.getMangaName());
             ((VHHeader) holder).categories.setText(mMangaDetails.getCategories());
             ((VHHeader) holder).status.setText(mMangaDetails.getStatus());
             ((VHHeader) holder).views.setText(mMangaDetails.getViews());

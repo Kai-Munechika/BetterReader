@@ -17,8 +17,6 @@ import java.util.Locale;
 
 public class HomeActivity extends AppCompatActivity {
 
-
-    public static String SELECTED_CHAPTER_ID = "selected_chapter_id";
     public static String SELECTED_MANGA_IMAGE_URL = "selected_manga_image_url";
     public static String SELECTED_MANGA_NAME = "selected_manga_name";
     public static String SELECTED_MANGA_ID = "selected_manga_id";
@@ -34,16 +32,10 @@ public class HomeActivity extends AppCompatActivity {
     private final int testStatus = 1;
     private final int testViews = 3957293;
 
-
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-//        final Intent intent = new Intent(this, ChapterViewingActivity.class);
-//        intent.putExtra(SELECTED_CHAPTER_ID, testChapterId);
 
         // pass the id, title, and image url, categories, status, views(hits),
         final Intent intent = new Intent(this, MangaAndItsChaptersInfoActivity.class);

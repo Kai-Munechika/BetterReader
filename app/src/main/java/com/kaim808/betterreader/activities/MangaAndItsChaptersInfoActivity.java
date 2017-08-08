@@ -1,5 +1,6 @@
 package com.kaim808.betterreader.activities;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -10,12 +11,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.kaim808.betterreader.ChapterMetaDataAdapter;
 import com.kaim808.betterreader.R;
+import com.kaim808.betterreader.etc.ChapterMetaDataAdapter;
+import com.kaim808.betterreader.etc.ItemClickSupport;
 import com.kaim808.betterreader.pojos.ChapterMetaData;
 import com.kaim808.betterreader.pojos.MangaAndItsChapters;
 import com.kaim808.betterreader.pojos.MangaDetails;
@@ -37,6 +40,9 @@ import retrofit2.Response;
 
 public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
 
+    public static String SELECTED_CHAPTER_ID = "selected_chapter_id";
+    public static String SELECTED_CHAPTER_SUBTITLE = "selected_chapter_subtitle";
+
     @BindView(R.id.image_banner)
     ImageView mImageBanner;
     @BindView(R.id.manga_info_toolbar)
@@ -46,8 +52,9 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
     @BindView(R.id.chapters_recycler_view)
     RecyclerView mChaptersRecyclerView;
 
-    MangaDetails mMangaDetails;
-    ChapterMetaDataAdapter mDataAdapter;
+    private ChapterMetaData mChapterMetaData;
+    private MangaDetails mMangaDetails;
+    private ChapterMetaDataAdapter mDataAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +79,7 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
     }
 
     private void setupToolbarTitle() {
-        mToolbar.setTitle(getMangaDetails().getTitle());
+        mToolbar.setTitle(getMangaDetails().getMangaName());
         // hide title when expanded
         mCollapsingToolbarLayout.setExpandedTitleColor(Color.TRANSPARENT);
     }
@@ -140,9 +147,26 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
     }
 
     private void updateRecyclerView(MangaAndItsChapters mangaAndItsChapters) {
-        ChapterMetaData chapterMetaData = new ChapterMetaData(mangaAndItsChapters.getChapters());
-        mDataAdapter.setChapterData(chapterMetaData);
+        mChapterMetaData = new ChapterMetaData(mangaAndItsChapters.getChapters());
+        mDataAdapter.setChapterData(mChapterMetaData);
         mDataAdapter.notifyDataSetChanged();
+
+        ItemClickSupport.addTo(mChaptersRecyclerView).setOnItemClickListener(
+                new ItemClickSupport.OnItemClickListener() {
+                    @Override
+                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                        if (position != ChapterMetaDataAdapter.HEADER_POSITION) {
+                            position--;
+                            String chapterId = mChapterMetaData.getChapterId(position);
+                            Intent intent = new Intent(MangaAndItsChaptersInfoActivity.this, ChapterViewingActivity.class);
+                            intent.putExtra(SELECTED_CHAPTER_ID, chapterId);
+                            intent.putExtra(HomeActivity.SELECTED_MANGA_NAME, mMangaDetails.getMangaName());
+                            intent.putExtra(SELECTED_CHAPTER_SUBTITLE, mChapterMetaData.getChapterTitle(position));
+                            startActivity(intent);
+                        }
+                    }
+                }
+        );
     }
 
     private MangaDetails getMangaDetails() {

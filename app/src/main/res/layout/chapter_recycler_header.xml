@@ -121,7 +121,7 @@
         android:layout_width="match_parent"
         android:layout_height="0.2dp"
         android:background="@color/defaultTextColor"
-        app:layout_constraintTop_toBottomOf="@id/description_toggle"
+        app:layout_constraintTop_toBottomOf="@+id/description_toggle"
         />
 
 
