@@ -25,7 +25,7 @@ public class HomeActivity extends AppCompatActivity {
     public static String SELECTED_MANGA_VIEWS = "selected_manga_views";
 
     private final String testChapterId = "5970b931719a168178337a81";
-    private final String testImageUrl = "83/83ec7cce8eb4142ce01ca3d28ab791e1452021a9981b433bf0929f6c.jpg";
+    private final String testImageUrl = "d6/d644db3bb8647192e4bd66b9bfa5dd73e1fbb6bcd83d39d7b5882438.jpg";
     private final String testName= "Boku no Hero Academia";
     private final String testMangaId = "541aabc045b9ef49009d69b6";
     private final List<String> testCategories = Arrays.asList("Action", "Science Fiction", "Adventure");

@@ -14,7 +14,7 @@
         android:layout_height="0.2dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:background="@color/defaultTextColor"
+        android:background="@color/listDivider"
         />
 
     <TextView
@@ -24,6 +24,7 @@
         android:layout_centerVertical="true"
         android:layout_marginStart="16dp"
         android:textSize="10.5sp"
+        android:textColor="@color/primaryDarkNormalWhiteText"
         />
 
     <LinearLayout
@@ -39,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp"
-            android:textColor="@color/black"
+            android:textColor="@color/primaryDarkNormalWhiteText"
             />
         <ProgressBar
             android:id="@+id/horizontal_progress_bar"

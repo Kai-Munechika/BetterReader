@@ -80,6 +80,7 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
 
     private void setupToolbarTitle() {
         mToolbar.setTitle(getMangaDetails().getMangaName());
+        mCollapsingToolbarLayout.setCollapsedTitleTextColor(ContextCompat.getColor(this, R.color.primaryLargeWhiteText));
         // hide title when expanded
         mCollapsingToolbarLayout.setExpandedTitleColor(Color.TRANSPARENT);
     }
@@ -103,7 +104,7 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             Drawable drawable = mToolbar.getNavigationIcon();
-            drawable.setColorFilter(ContextCompat.getColor(this, R.color.black), PorterDuff.Mode.SRC_ATOP);
+            drawable.setColorFilter(ContextCompat.getColor(this, R.color.primaryLargeWhiteText), PorterDuff.Mode.SRC_ATOP);
         }
     }
 

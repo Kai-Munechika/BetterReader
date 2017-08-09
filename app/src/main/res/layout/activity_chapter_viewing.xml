@@ -35,7 +35,6 @@
         android:layout_height="73dp"
         android:layout_gravity="bottom"
         android:orientation="vertical"
-        app:cardBackgroundColor="@color/materialBackgroundLight"
         app:cardCornerRadius="0dp"
         app:cardElevation="2dp"
         >

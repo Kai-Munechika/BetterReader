@@ -40,6 +40,7 @@ import retrofit2.Response;
 
 // TODO: 8/6/17 figure out how to toggle ui while image is loading
 // TODO: 8/8/17 next/previous chapter if they try to go to next page at either end
+// TODO: 8/9/17 figure out how to load images faster
 public class ChapterViewingActivity extends AppCompatActivity {
 
     @BindView(R.id.view_pager)
@@ -241,7 +242,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
                 mImageUrls = getImageUrls(chapterPages);
                 mPagerAdapter = new ChapterPageAdapter(getSupportFragmentManager());
                 mPager.setAdapter(mPagerAdapter);
-                mPager.setOffscreenPageLimit(1);
+                mPager.setOffscreenPageLimit(5);
 
                 mPageSeekbar.setMax(mImageUrls.length - 1);
                 mPageSeekbar.setEnabled(true);

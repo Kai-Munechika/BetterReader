@@ -1,16 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+
+    <color name="colorPrimary">#728395</color>
+
+    <!-- min 77% opacity: cc = 80% -->
+    <color name="primaryLargeWhiteText">#ccffffff</color>
+    <!-- min 57% opacity: 99 = 60% -->
+    <color name="primaryLargeBlackText">#99000000</color>
+    <!-- min 80% opacity: cc = 80% -->
+    <color name="primaryNormalBlackText">#ccffffff</color>
+
+
+    <color name="colorLight">#a1b2c6</color>
+
+    <!-- min 47% opacity: 80 = 50% -->
+    <color name="lightLargeBlackText">#80000000</color>
+    <!-- min 62% opacity: a6 = 65%-->
+    <color name="lightNormalBlackText">#a6000000</color>
+
+
+    <color name="colorPrimaryDark">#465667</color>
+
+    <!-- min 47% opacity: 80 = 50%, cc = 80% -->
+    <color name="primaryDarkLargeWhiteText">#ccffffff</color>
+    <!-- min 68% opacity: b3 = 70% -->
+    <color name="primaryDarkNormalWhiteText">#b3ffffff</color>
+
     <color name="colorAccent">#549488</color>
+    <color name="listDivider">#fff</color>
 
     <color name="white">#fff</color>
     <color name="black">#000</color>
-
-    <color name="materialBackgroundLight">#f5f5f5</color>
-    <color name="materialBackground">#fafafa</color>
-    <color name="materialBackground2">#ededed</color>
     <color name="transparent">#00000000</color>
-    <color name="defaultTextColor">#727272</color>
 
 </resources>
