@@ -1,6 +1,9 @@
 package com.kaim808.betterreader.utils;
 
 import android.content.Context;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
+import android.view.ViewConfiguration;
 
 /**
  * Created by KaiM on 7/27/17.
@@ -28,11 +31,25 @@ public class ViewMeasurementUtils {
     public static int getNavigationBarHeight(Context context) {
         // navigation bar height
         int navigationBarHeight = 0;
+        if (!hasSoftKeys(context)) {
+            return navigationBarHeight;
+        }
         int resourceId = context.getResources().getIdentifier("navigation_bar_height", "dimen", "android");
         if (resourceId > 0) {
             navigationBarHeight = context.getResources().getDimensionPixelSize(resourceId);
             return navigationBarHeight;
         }
         return 0;
+    }
+
+    // to figure out whether the navigation bar is physical or not
+    private static boolean hasSoftKeys(Context context){
+        boolean hasSoftwareKeys;
+
+        boolean hasMenuKey = ViewConfiguration.get(context).hasPermanentMenuKey();
+        boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
+        hasSoftwareKeys = !hasMenuKey && !hasBackKey;
+
+        return hasSoftwareKeys;
     }
 }

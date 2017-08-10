@@ -41,6 +41,7 @@ import retrofit2.Response;
 // TODO: 8/6/17 figure out how to toggle ui while image is loading
 // TODO: 8/8/17 next/previous chapter if they try to go to next page at either end
 // TODO: 8/9/17 figure out how to load images faster
+// TODO: 8/9/17 read and save progress for each chapter
 public class ChapterViewingActivity extends AppCompatActivity {
 
     @BindView(R.id.view_pager)

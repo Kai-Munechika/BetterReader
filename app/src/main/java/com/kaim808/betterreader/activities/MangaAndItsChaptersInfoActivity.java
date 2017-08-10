@@ -33,10 +33,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-// TODO: 8/3/17 blur banner image
+// TODO: 8/3/17 blur banner image or pull first google image result to replace it
 // TODO: 8/3/17 animate expansion/collapse of description
-// TODO: 8/6/17 wire up recyclerview touches to viewing that actual chapter
 // TODO: 8/6/17 add animation to recyclerview item touches
+// TODO: 8/9/17 and scrolling scrubber
 
 public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
 
