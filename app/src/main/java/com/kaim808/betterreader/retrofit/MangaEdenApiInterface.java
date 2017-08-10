@@ -2,6 +2,7 @@ package com.kaim808.betterreader.retrofit;
 
 import com.kaim808.betterreader.pojos.ChapterPages;
 import com.kaim808.betterreader.pojos.MangaAndItsChapters;
+import com.kaim808.betterreader.pojos.MangaList;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -18,8 +19,8 @@ public interface MangaEdenApiInterface {
      */
 
     // might have a bug since this has no parameters; should probably never use this because it'll take a while to load 6.4 mb
-//    @GET("list/0/")
-//    Call<MangaList> getMangaList();
+    @GET("list/0/")
+    Call<MangaList> getMangaList();
 
     @GET("manga/{mangaId}")
     Call<MangaAndItsChapters> getMangaAndChapters(@Path("mangaId") String mangaId);

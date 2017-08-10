@@ -4,9 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.kaim808.betterreader.R;
+import com.kaim808.betterreader.pojos.MangaList;
+import com.kaim808.betterreader.retrofit.MangaEdenApiInterface;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,6 +18,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+// TODO: 8/10/17 see how long it takes to make the mangaListCall via progressbar/logging 
 public class HomeActivity extends AppCompatActivity {
 
     public static String SELECTED_MANGA_IMAGE_URL = "selected_manga_image_url";
@@ -31,6 +39,8 @@ public class HomeActivity extends AppCompatActivity {
     private final List<String> testCategories = Arrays.asList("Action", "Science Fiction", "Adventure");
     private final int testStatus = 1;
     private final int testViews = 3957293;
+
+    ProgressBar testProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +65,23 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+        testProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
+    }
+
+    private void makeMangaListCall(final MangaEdenApiInterface apiInterface){
+        Call<MangaList> call = apiInterface.getMangaList();
+        call.enqueue(new Callback<MangaList>() {
+            @Override
+            public void onResponse(Call<MangaList> call, Response<MangaList> response) {
+
+            }
+
+            @Override
+            public void onFailure(Call<MangaList> call, Throwable t) {
+
+            }
+        });
     }
 
     private String statusToString(int status) {
