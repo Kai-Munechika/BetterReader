@@ -6,12 +6,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.github.chrisbanes.photoview.OnViewTapListener;
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
+import com.kaim808.betterreader.OnSingleTapListener;
 import com.kaim808.betterreader.R;
 import com.kaim808.betterreader.activities.ChapterViewingActivity;
 import com.kaim808.betterreader.utils.ImageLoadingUtilities;
@@ -34,6 +36,12 @@ public class ChapterPageFragment extends Fragment implements OnViewTapListener {
         PhotoViewAttacher mAttacher = new PhotoViewAttacher(pageContainer);
         mAttacher.setOnViewTapListener(this);
 
+        rootView.setOnTouchListener(new OnSingleTapListener(getActivity()) {
+            @Override
+            public void onSingleTap(MotionEvent e) {
+                onViewTap(null, 0, 0);
+            }
+        });
         return rootView;
     }
 

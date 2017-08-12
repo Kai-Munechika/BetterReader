@@ -38,10 +38,15 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-// TODO: 8/6/17 figure out how to toggle ui while image is loading
-// TODO: 8/8/17 next/previous chapter if they try to go to next page at either end
+
+// TODO: 8/8/17 next/previous chapter if they try to go to next page at either end; via swipe or button touch
+// TODO: 8/12/17 add settings; 1 setting: show dialog on next/previous at either end of chapter
+
 // TODO: 8/9/17 figure out how to load images faster
 // TODO: 8/9/17 read and save progress for each chapter
+// TODO: 8/12/17 enable up navigation
+// TODO: 8/12/17 fix the colors; make it a dark background with some trasparancy and white text
+
 public class ChapterViewingActivity extends AppCompatActivity {
 
     @BindView(R.id.view_pager)

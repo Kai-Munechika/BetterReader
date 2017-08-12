@@ -21,7 +21,6 @@
         tools:background="@color/colorAccent"
         />
 
-
     <com.kaim808.betterreader.ui.ViewPagerFixed
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/view_pager"
