@@ -12,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -74,7 +75,7 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         ImageLoadingUtilities.loadUrlIntoImageView(mMangaDetails.getImageUrl(), mImageBanner, this);
         setupToolbarTitle();
         moveLayoutBelowStatusBar();
-        setStatusBarTranslucent(true);
+        setStatusBarTranslucent(true, getWindow());
         enableUpNavigation();
         initializeRecyclerView();
     }
@@ -92,11 +93,11 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         mToolbar.setLayoutParams(layoutParams);
     }
 
-    protected void setStatusBarTranslucent(boolean makeTranslucent) {
+    protected static void setStatusBarTranslucent(boolean makeTranslucent, Window window) {
         if (makeTranslucent) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         } else {
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
     }
 

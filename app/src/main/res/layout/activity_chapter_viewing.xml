@@ -13,12 +13,13 @@
         android:id="@+id/chapter_viewing_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="@color/transparentBlack"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:subtitleTextAppearance="@style/chapterSubtitleTextAppearance"
-        tools:background="@color/colorAccent"
+        app:titleTextColor="@color/largeWhiteTextOnTransparentBackground"
+        app:subtitleTextColor="@color/normalWhiteTextOnTransparentBackground"
         />
 
     <com.kaim808.betterreader.ui.ViewPagerFixed
@@ -36,12 +37,13 @@
         android:orientation="vertical"
         app:cardCornerRadius="0dp"
         app:cardElevation="2dp"
+        android:backgroundTint="@color/transparentBlack"
         >
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0.25dp"
-            android:background="#d6d6d6"/>
+        <!--<View-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="0.25dp"-->
+            <!--android:background="#d6d6d6"/>-->
 
         <SeekBar
             android:id="@+id/page_seekbar"
@@ -51,6 +53,9 @@
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginTop="12dp"
+            android:thumbTint="@color/colorAccent"
+            android:progressTint="@color/colorAccent"
+            android:progressBackgroundTint="@color/colorAccent"
             />
 
         <TextView
@@ -61,6 +66,7 @@
             android:layout_marginTop="42dp"
             android:textSize="16sp"
             tools:text="Page 46 of 105 ⋅ 42%"
+            android:textColor="@color/normalWhiteTextOnTransparentBackground"
             />
 
 

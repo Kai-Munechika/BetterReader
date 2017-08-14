@@ -32,5 +32,9 @@
     <color name="white">#fff</color>
     <color name="black">#000</color>
     <color name="transparent">#00000000</color>
+    <color name="transparentBlack">#77000000</color>
+    <color name="largeWhiteTextOnTransparentBackground">#fff</color>
+    <color name="normalWhiteTextOnTransparentBackground">#fff</color>
+
 
 </resources>

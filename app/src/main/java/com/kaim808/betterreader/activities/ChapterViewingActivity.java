@@ -1,10 +1,12 @@
 package com.kaim808.betterreader.activities;
 
 import android.animation.ObjectAnimator;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.ContentLoadingProgressBar;
@@ -45,7 +47,6 @@ import retrofit2.Response;
 // TODO: 8/9/17 figure out how to load images faster
 // TODO: 8/9/17 read and save progress for each chapter
 // TODO: 8/12/17 enable up navigation
-// TODO: 8/12/17 fix the colors; make it a dark background with some trasparancy and white text
 
 public class ChapterViewingActivity extends AppCompatActivity {
 
@@ -93,6 +94,8 @@ public class ChapterViewingActivity extends AppCompatActivity {
 
     /* Methods for initializing the system ui */
     private void initializeSystemUi() {
+        MangaAndItsChaptersInfoActivity.setStatusBarTranslucent(true, getWindow());
+        showActivityUi();
         // any view here works, as long as it's in the activity
         mDecorView = getWindow().getDecorView();
         mDecorView.setOnSystemUiVisibilityChangeListener
@@ -131,6 +134,14 @@ public class ChapterViewingActivity extends AppCompatActivity {
         mToolbar.setTitle(getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_NAME));
         mToolbar.setSubtitle(getIntent().getStringExtra(MangaAndItsChaptersInfoActivity.SELECTED_CHAPTER_SUBTITLE));
         setSupportActionBar(mToolbar);
+
+//        make overflow icon white
+        Drawable drawable = mToolbar.getOverflowIcon();
+        if(drawable != null) {
+            drawable = DrawableCompat.wrap(drawable);
+            DrawableCompat.setTint(drawable.mutate(), getResources().getColor(R.color.white));
+            mToolbar.setOverflowIcon(drawable);
+        }
 
         // if I decide to use the up action, gotta declare the parent activity in the manifest
 //        ActionBar ab = getSupportActionBar();
