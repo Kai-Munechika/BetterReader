@@ -2,7 +2,11 @@ package com.kaim808.betterreader.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -18,6 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -40,12 +46,18 @@ public class HomeActivity extends AppCompatActivity {
     private final int testStatus = 1;
     private final int testViews = 3957293;
 
+    @BindView(R.id.home_toolbar)
+    Toolbar mToolbar;
+
     ProgressBar testProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        ButterKnife.bind(this);
+
+        initializeUi();
 
         // pass the id, title, and image url, categories, status, views(hits),
         final Intent intent = new Intent(this, MangaAndItsChaptersInfoActivity.class);
@@ -67,6 +79,21 @@ public class HomeActivity extends AppCompatActivity {
 
         testProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
+
+    }
+
+    private void initializeUi() {
+        setupSystemUi();
+        setupToolbar();
+    }
+
+    private void setupSystemUi() {
+        MangaAndItsChaptersInfoActivity.setStatusBarTranslucent(true, getWindow());
+        MangaAndItsChaptersInfoActivity.moveLayoutBelowStatusBar(mToolbar, this);
+    }
+    private void setupToolbar() {
+        mToolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.primaryLargeWhiteText));
+        setSupportActionBar(mToolbar);
     }
 
     private void makeMangaListCall(final MangaEdenApiInterface apiInterface){
@@ -92,5 +119,10 @@ public class HomeActivity extends AppCompatActivity {
         return NumberFormat.getNumberInstance(Locale.US).format(numViews) + " views";
     }
 
-
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.home_menu, menu);
+        return true;
+    }
 }

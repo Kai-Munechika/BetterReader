@@ -3,8 +3,8 @@
 
     <color name="colorPrimary">#728395</color>
 
-    <!-- min 77% opacity: cc = 80% -->
-    <color name="primaryLargeWhiteText">#ccffffff</color>
+    <!-- min 77% opacity: cc = 80%, f2 = 95% -->
+    <color name="primaryLargeWhiteText">#f2ffff</color>
     <!-- min 57% opacity: 99 = 60% -->
     <color name="primaryLargeBlackText">#99000000</color>
     <!-- min 80% opacity: cc = 80% -->

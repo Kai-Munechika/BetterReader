@@ -6,6 +6,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.kaim808.betterreader.R;
@@ -74,7 +76,7 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
     private void initializeUi() {
         ImageLoadingUtilities.loadUrlIntoImageView(mMangaDetails.getImageUrl(), mImageBanner, this);
         setupToolbarTitle();
-        moveLayoutBelowStatusBar();
+        moveLayoutBelowStatusBar(mToolbar, this);
         setStatusBarTranslucent(true, getWindow());
         enableUpNavigation(mToolbar, this);
         initializeRecyclerView();
@@ -87,10 +89,18 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         mCollapsingToolbarLayout.setExpandedTitleColor(Color.TRANSPARENT);
     }
 
-    private void moveLayoutBelowStatusBar() {
-        CollapsingToolbarLayout.LayoutParams layoutParams = (CollapsingToolbarLayout.LayoutParams) mToolbar.getLayoutParams();
-        layoutParams.setMargins(0, ViewMeasurementUtils.getStatusBarHeight(this), 0, 0);
-        mToolbar.setLayoutParams(layoutParams);
+    protected static void moveLayoutBelowStatusBar(Toolbar toolbar, AppCompatActivity appCompatActivity) {
+        if (appCompatActivity.findViewById(R.id.root_view_group) instanceof RelativeLayout) {
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) toolbar.getLayoutParams();
+            layoutParams.setMargins(0, ViewMeasurementUtils.getStatusBarHeight(appCompatActivity), 0, 0);
+            toolbar.setLayoutParams(layoutParams);
+        }
+        else if (appCompatActivity.findViewById(R.id.root_view_group) instanceof CoordinatorLayout) {
+            CollapsingToolbarLayout.LayoutParams layoutParams = (CollapsingToolbarLayout.LayoutParams) toolbar.getLayoutParams();
+            layoutParams.setMargins(0, ViewMeasurementUtils.getStatusBarHeight(appCompatActivity), 0, 0);
+            toolbar.setLayoutParams(layoutParams);
+        }
+
     }
 
     protected static void setStatusBarTranslucent(boolean makeTranslucent, Window window) {
