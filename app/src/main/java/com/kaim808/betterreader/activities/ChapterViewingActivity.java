@@ -40,13 +40,13 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.kaim808.betterreader.activities.MangaAndItsChaptersInfoActivity.enableUpNavigation;
 
 // TODO: 8/8/17 next/previous chapter if they try to go to next page at either end; via swipe or button touch
 // TODO: 8/12/17 add settings; 1 setting: show dialog on next/previous at either end of chapter
 
 // TODO: 8/9/17 figure out how to load images faster
 // TODO: 8/9/17 read and save progress for each chapter
-// TODO: 8/12/17 enable up navigation
 
 public class ChapterViewingActivity extends AppCompatActivity {
 
@@ -131,6 +131,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
 
     /* Methods for initializing the Ui */
     private void initializeActionBar() {
+        enableUpNavigation(mToolbar, this);
         mToolbar.setTitle(getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_NAME));
         mToolbar.setSubtitle(getIntent().getStringExtra(MangaAndItsChaptersInfoActivity.SELECTED_CHAPTER_SUBTITLE));
         setSupportActionBar(mToolbar);

@@ -76,7 +76,7 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         setupToolbarTitle();
         moveLayoutBelowStatusBar();
         setStatusBarTranslucent(true, getWindow());
-        enableUpNavigation();
+        enableUpNavigation(mToolbar, this);
         initializeRecyclerView();
     }
 
@@ -101,12 +101,12 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         }
     }
 
-    private void enableUpNavigation() {
-        setSupportActionBar(mToolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            Drawable drawable = mToolbar.getNavigationIcon();
-            drawable.setColorFilter(ContextCompat.getColor(this, R.color.primaryLargeWhiteText), PorterDuff.Mode.SRC_ATOP);
+    protected static void enableUpNavigation(Toolbar toolbar, AppCompatActivity appCompatActivity) {
+        appCompatActivity.setSupportActionBar(toolbar);
+        if (appCompatActivity.getSupportActionBar() != null) {
+            appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            Drawable drawable = toolbar.getNavigationIcon();
+            drawable.setColorFilter(ContextCompat.getColor(appCompatActivity, R.color.primaryLargeWhiteText), PorterDuff.Mode.SRC_ATOP);
         }
     }
 
