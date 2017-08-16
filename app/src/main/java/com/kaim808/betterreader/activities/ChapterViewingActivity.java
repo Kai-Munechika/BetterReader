@@ -85,7 +85,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chapter_viewing);
         ButterKnife.bind(this);
 
-        initializeActionBar();
+        initializeToolbar();
         initializeMainContent();
         initializeBottomUI();
         initializeSystemUi();
@@ -95,7 +95,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
     /* Methods for initializing the system ui */
     private void initializeSystemUi() {
         MangaAndItsChaptersInfoActivity.setStatusBarTranslucent(true, getWindow());
-        showActivityUi();
+        showToolbar();
         // any view here works, as long as it's in the activity
         mDecorView = getWindow().getDecorView();
         mDecorView.setOnSystemUiVisibilityChangeListener
@@ -130,7 +130,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
     }
 
     /* Methods for initializing the Ui */
-    private void initializeActionBar() {
+    private void initializeToolbar() {
         enableUpNavigation(mToolbar, this);
         mToolbar.setTitle(getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_NAME));
         mToolbar.setSubtitle(getIntent().getStringExtra(MangaAndItsChaptersInfoActivity.SELECTED_CHAPTER_SUBTITLE));
@@ -209,23 +209,25 @@ public class ChapterViewingActivity extends AppCompatActivity {
     }
 
     private void showActivityUi() {
-
-        ObjectAnimator showToolbarAnimator = ObjectAnimator.ofFloat(mToolbar, "translationY", ViewMeasurementUtils.getStatusBarHeight(this));
-        ObjectAnimator showBottomAnimator = ObjectAnimator.ofFloat(mBottomNavigationView, "translationY", -ViewMeasurementUtils.getNavigationBarHeight(this));
-
-        showToolbarAnimator.start();
-        showBottomAnimator.start();
-
-
+        showToolbar();
+        showBottomUi();
+    }
+    private void showToolbar() {
+        ObjectAnimator.ofFloat(mToolbar, "translationY", ViewMeasurementUtils.getStatusBarHeight(this)).start();
+    }
+    private void showBottomUi() {
+        ObjectAnimator.ofFloat(mBottomNavigationView, "translationY", -ViewMeasurementUtils.getNavigationBarHeight(this)).start();
     }
 
     private void hideActivityUi() {
-        ObjectAnimator hideToolbarAnimator = ObjectAnimator.ofFloat(mToolbar, "y", -(mToolbar.getY() + mToolbar.getHeight()));
-        ObjectAnimator hideBottomAnimator = ObjectAnimator.ofFloat(mBottomNavigationView, "translationY", ViewMeasurementUtils.getNavigationBarHeight(this) + mBottomNavigationView.getHeight());
-
-        hideToolbarAnimator.start();
-        hideBottomAnimator.start();
-
+        hideToolbar();
+        hideBottomUi();
+    }
+    private void hideToolbar() {
+        ObjectAnimator.ofFloat(mToolbar, "y", -(mToolbar.getY() + mToolbar.getHeight())).start();
+    }
+    private void hideBottomUi() {
+        ObjectAnimator.ofFloat(mBottomNavigationView, "translationY", ViewMeasurementUtils.getNavigationBarHeight(this) + mBottomNavigationView.getHeight()).start();
     }
 
     @Override

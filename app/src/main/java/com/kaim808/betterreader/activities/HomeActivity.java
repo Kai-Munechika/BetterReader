@@ -5,8 +5,10 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -93,6 +95,7 @@ public class HomeActivity extends AppCompatActivity {
     }
     private void setupToolbar() {
         mToolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.primaryLargeWhiteText));
+        mToolbar.setNavigationIcon(R.drawable.ic_menu);
         setSupportActionBar(mToolbar);
     }
 
@@ -124,5 +127,20 @@ public class HomeActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.home_menu, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case (android.R.id.home):
+                Log.e("kaikai", "menu button pressed");
+                return true;
+            case (R.id.action_search):
+//                launch a searchable spinner dialog
+                Log.e("kaikai", "search button pressed");
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
