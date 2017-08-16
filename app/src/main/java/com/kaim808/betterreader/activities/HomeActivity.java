@@ -9,8 +9,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 
 import com.kaim808.betterreader.R;
 import com.kaim808.betterreader.pojos.Manga;
@@ -51,8 +49,8 @@ public class HomeActivity extends AppCompatActivity {
 
     @BindView(R.id.home_toolbar)
     Toolbar mToolbar;
-
-    TextView testTextView;
+    
+    List<Manga> mMangas;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +69,6 @@ public class HomeActivity extends AppCompatActivity {
 //        intent.putExtra(SELECTED_MANGA_STATUS, statusToString(testStatus));
 //        intent.putExtra(SELECTED_MANGA_VIEWS, numViewsToString(testViews));
 //
-        testTextView = (TextView) findViewById(R.id.testTextView);
 
 
 
@@ -116,15 +113,7 @@ public class HomeActivity extends AppCompatActivity {
             public void onResponse(Call<MangaList> call, Response<MangaList> response) {
                 Log.e("kaikai", "end time: " + System.currentTimeMillis());
                 MangaList mangaListRoot = response.body();
-                final List<Manga> mangas = mangaListRoot.getMangas();
-
-                testTextView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        mangaSelected(mangas.get(770));
-                    }
-                });
-
+                mMangas = mangaListRoot.getMangas();
             }
 
             @Override
@@ -154,6 +143,10 @@ public class HomeActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case (android.R.id.home):
                 Log.e("kaikai", "menu button pressed");
+                if (mMangas != null) {
+                    int i = (int) (Math.random()*mMangas.size());
+                    mangaSelected(mMangas.get(i));
+                }
                 return true;
             case (R.id.action_search):
 //                launch a searchable spinner dialog

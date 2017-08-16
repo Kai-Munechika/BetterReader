@@ -1,5 +1,7 @@
 package com.kaim808.betterreader.pojos;
 
+import android.text.Html;
+
 /**
  * Created by KaiM on 8/7/17.
  */
@@ -30,7 +32,7 @@ public class MangaDetails {
     }
 
     public String getMangaName() {
-        return title;
+        return Html.fromHtml(title).toString();
     }
 
     public void setTitle(String title) {

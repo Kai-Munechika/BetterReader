@@ -15,18 +15,6 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary"
         >
-
     </android.support.v7.widget.Toolbar>
 
-    <TextView
-        android:id="@+id/testTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="tap me"
-        android:padding="50dp"
-        android:gravity="center"
-        android:background="@color/colorAccent"
-        android:textColor="#fff"
-        />
 </RelativeLayout>
