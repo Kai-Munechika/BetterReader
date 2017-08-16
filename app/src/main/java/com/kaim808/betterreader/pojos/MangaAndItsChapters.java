@@ -4,6 +4,9 @@ package com.kaim808.betterreader.pojos;
  * Created by KaiM on 7/19/17.
  */
 
+import android.os.Build;
+import android.text.Html;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -209,7 +212,12 @@ public class MangaAndItsChapters {
     }
 
     public String getDescription() {
-        return description;
+        if (Build.VERSION.SDK_INT >= 24) {
+            return Html.fromHtml(description, Html.FROM_HTML_MODE_LEGACY).toString();
+        } else {
+            // deprecated as of api 24
+            return Html.fromHtml(description).toString();
+        }
     }
 
     public void setDescription(String description) {

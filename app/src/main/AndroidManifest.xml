@@ -12,7 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
 
-        <activity android:name=".activities.HomeActivity">
+        <activity
+            android:name=".activities.HomeActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -22,8 +24,8 @@
 
         <activity
             android:name=".activities.MangaAndItsChaptersInfoActivity"
-            android:parentActivityName=".activities.HomeActivity"
             android:launchMode="singleTop"
+            android:parentActivityName=".activities.HomeActivity"
             >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -33,8 +35,8 @@
         <!--android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">-->
         <activity
             android:name=".activities.ChapterViewingActivity"
-            android:theme="@style/AppTheme.NoActionBar"
             android:parentActivityName=".activities.MangaAndItsChaptersInfoActivity"
+            android:theme="@style/AppTheme.NoActionBar"
             >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

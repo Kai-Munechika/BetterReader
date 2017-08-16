@@ -10,12 +10,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.kaim808.betterreader.R;
+import com.kaim808.betterreader.pojos.Manga;
 import com.kaim808.betterreader.pojos.MangaList;
 import com.kaim808.betterreader.retrofit.MangaEdenApiInterface;
+import com.kaim808.betterreader.retrofit.RetrofitSingleton;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -30,7 +31,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-// TODO: 8/10/17 see how long it takes to make the mangaListCall via progressbar/logging 
+// TODO: Note: it takes around 4 - 4.5 seconds to load
 public class HomeActivity extends AppCompatActivity {
 
     public static String SELECTED_MANGA_IMAGE_URL = "selected_manga_image_url";
@@ -51,7 +52,7 @@ public class HomeActivity extends AppCompatActivity {
     @BindView(R.id.home_toolbar)
     Toolbar mToolbar;
 
-    ProgressBar testProgressBar;
+    TextView testTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,27 +62,35 @@ public class HomeActivity extends AppCompatActivity {
 
         initializeUi();
 
+//        final Intent intent = new Intent(this, MangaAndItsChaptersInfoActivity.class);
+//        intent.putExtra(SELECTED_MANGA_IMAGE_URL, testImageUrl);
+//        intent.putExtra(SELECTED_MANGA_NAME, testName);
+//        intent.putExtra(SELECTED_MANGA_ID, testMangaId);
+//
+//        intent.putExtra(SELECTED_MANGA_CATEGORIES, StringUtils.join(testCategories, ", "));
+//        intent.putExtra(SELECTED_MANGA_STATUS, statusToString(testStatus));
+//        intent.putExtra(SELECTED_MANGA_VIEWS, numViewsToString(testViews));
+//
+        testTextView = (TextView) findViewById(R.id.testTextView);
+
+
+
+
+        makeMangaListCall(RetrofitSingleton.mangaEdenApiInterface);
+
+    }
+    private void mangaSelected(Manga manga) {
         // pass the id, title, and image url, categories, status, views(hits),
         final Intent intent = new Intent(this, MangaAndItsChaptersInfoActivity.class);
-        intent.putExtra(SELECTED_MANGA_IMAGE_URL, testImageUrl);
-        intent.putExtra(SELECTED_MANGA_NAME, testName);
-        intent.putExtra(SELECTED_MANGA_ID, testMangaId);
+        intent.putExtra(SELECTED_MANGA_IMAGE_URL, manga.getImageUrl());
+        intent.putExtra(SELECTED_MANGA_NAME, manga.getTitle());
+        intent.putExtra(SELECTED_MANGA_ID, manga.getId());
 
-        intent.putExtra(SELECTED_MANGA_CATEGORIES, StringUtils.join(testCategories, ", "));
-        intent.putExtra(SELECTED_MANGA_STATUS, statusToString(testStatus));
-        intent.putExtra(SELECTED_MANGA_VIEWS, numViewsToString(testViews));
+        intent.putExtra(SELECTED_MANGA_CATEGORIES, StringUtils.join(manga.getCategories(), ", "));
+        intent.putExtra(SELECTED_MANGA_STATUS, statusToString(manga.getStatus()));
+        intent.putExtra(SELECTED_MANGA_VIEWS, numViewsToString(manga.getHits()));
 
-        TextView testTextView = (TextView) findViewById(R.id.testTextView);
-        testTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(intent);
-            }
-        });
-
-        testProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
-
-
+        startActivity(intent);
     }
 
     private void initializeUi() {
@@ -100,10 +109,21 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void makeMangaListCall(final MangaEdenApiInterface apiInterface){
+        Log.e("kaikai", "Start time: " + System.currentTimeMillis());
         Call<MangaList> call = apiInterface.getMangaList();
         call.enqueue(new Callback<MangaList>() {
             @Override
             public void onResponse(Call<MangaList> call, Response<MangaList> response) {
+                Log.e("kaikai", "end time: " + System.currentTimeMillis());
+                MangaList mangaListRoot = response.body();
+                final List<Manga> mangas = mangaListRoot.getMangas();
+
+                testTextView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mangaSelected(mangas.get(770));
+                    }
+                });
 
             }
 

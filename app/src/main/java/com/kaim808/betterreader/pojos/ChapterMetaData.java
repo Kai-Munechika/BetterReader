@@ -29,7 +29,10 @@ public class ChapterMetaData {
 
     public String getChapterTitle(int index) {
         String title = chapters.get(index).get(CHAPTER_TITLE_INDEX);
-        if (title.equals(String.valueOf(getChapterNumber(index)))) {
+        if (title == null) {
+            title = "Chapter " + getChapterNumber(index);
+        }
+        else if (title.equals(String.valueOf(getChapterNumber(index)))) {
             title = "Chapter " + title;
         }
         return title;

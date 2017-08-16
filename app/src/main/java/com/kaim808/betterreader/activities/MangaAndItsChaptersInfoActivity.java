@@ -40,7 +40,7 @@ import retrofit2.Response;
 // TODO: 8/3/17 animate expansion/collapse of description
 // TODO: 8/6/17 add animation to recyclerview item touches
 // TODO: 8/9/17 and scrolling scrubber
-// TODO: 8/12/17 animate the fab
+// TODO: 8/12/17 animate the fab press, and initialize animation from right-off screen to left
 
 public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
 
