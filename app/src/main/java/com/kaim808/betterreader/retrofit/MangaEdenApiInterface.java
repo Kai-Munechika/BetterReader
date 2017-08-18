@@ -19,7 +19,7 @@ public interface MangaEdenApiInterface {
      */
 
     // might have a bug since this has no parameters; should probably never use this because it'll take a while to load 6.4 mb
-    @GET("list/0/")
+    @GET("list/0/")     // append ?p=0 to load first 500 manga
     Call<MangaList> getMangaList();
 
     @GET("manga/{mangaId}")

@@ -1,6 +1,7 @@
 package com.kaim808.betterreader.activities;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -16,12 +17,8 @@ import com.kaim808.betterreader.pojos.MangaList;
 import com.kaim808.betterreader.retrofit.MangaEdenApiInterface;
 import com.kaim808.betterreader.retrofit.RetrofitSingleton;
 
-import org.apache.commons.lang3.StringUtils;
-
-import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -30,6 +27,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 // TODO: Note: it takes around 4 - 4.5 seconds to load
+// TODO: 8/17/17 make persistManga a method that works on a background service rather than thread; the manga saving is disrupted onDestroy()
 public class HomeActivity extends AppCompatActivity {
 
     public static String SELECTED_MANGA_IMAGE_URL = "selected_manga_image_url";
@@ -49,7 +47,7 @@ public class HomeActivity extends AppCompatActivity {
 
     @BindView(R.id.home_toolbar)
     Toolbar mToolbar;
-    
+
     List<Manga> mMangas;
 
     @Override
@@ -59,33 +57,32 @@ public class HomeActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         initializeUi();
-
-//        final Intent intent = new Intent(this, MangaAndItsChaptersInfoActivity.class);
-//        intent.putExtra(SELECTED_MANGA_IMAGE_URL, testImageUrl);
-//        intent.putExtra(SELECTED_MANGA_NAME, testName);
-//        intent.putExtra(SELECTED_MANGA_ID, testMangaId);
-//
-//        intent.putExtra(SELECTED_MANGA_CATEGORIES, StringUtils.join(testCategories, ", "));
-//        intent.putExtra(SELECTED_MANGA_STATUS, statusToString(testStatus));
-//        intent.putExtra(SELECTED_MANGA_VIEWS, numViewsToString(testViews));
-//
-
-
-
-
-        makeMangaListCall(RetrofitSingleton.mangaEdenApiInterface);
-
+        load_mMangas();
     }
-    private void mangaSelected(Manga manga) {
+
+    private void load_mMangas() {
+        try {
+            mMangas = Manga.listAll(Manga.class);
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        } finally {
+            if (mMangas == null || mMangas.size() == 0) {
+                makeMangaListCall(RetrofitSingleton.mangaEdenApiInterface);
+            }
+            Log.e("kaikai", "mManga successfully loaded");
+        }
+    }
+
+    private void onMangaSelected(Manga manga) {
         // pass the id, title, and image url, categories, status, views(hits),
         final Intent intent = new Intent(this, MangaAndItsChaptersInfoActivity.class);
         intent.putExtra(SELECTED_MANGA_IMAGE_URL, manga.getImageUrl());
         intent.putExtra(SELECTED_MANGA_NAME, manga.getTitle());
-        intent.putExtra(SELECTED_MANGA_ID, manga.getId());
+        intent.putExtra(SELECTED_MANGA_ID, manga.getMangaId());
 
-        intent.putExtra(SELECTED_MANGA_CATEGORIES, StringUtils.join(manga.getCategories(), ", "));
-        intent.putExtra(SELECTED_MANGA_STATUS, statusToString(manga.getStatus()));
-        intent.putExtra(SELECTED_MANGA_VIEWS, numViewsToString(manga.getHits()));
+        intent.putExtra(SELECTED_MANGA_CATEGORIES, manga.categoriesToString());
+        intent.putExtra(SELECTED_MANGA_STATUS, manga.getFormattedStatus(this));
+        intent.putExtra(SELECTED_MANGA_VIEWS, manga.getFormattedNumViews());
 
         startActivity(intent);
     }
@@ -114,6 +111,9 @@ public class HomeActivity extends AppCompatActivity {
                 Log.e("kaikai", "end time: " + System.currentTimeMillis());
                 MangaList mangaListRoot = response.body();
                 mMangas = mangaListRoot.getMangas();
+
+                persistMangas();
+
             }
 
             @Override
@@ -123,12 +123,18 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    private String statusToString(int status) {
-        return status == 1 ? getString(R.string.ongoing) : getString(R.string.completed);
-    }
-
-    private String numViewsToString(int numViews) {
-        return NumberFormat.getNumberInstance(Locale.US).format(numViews) + " views";
+    private void persistMangas() {
+        Thread backgroundThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < mMangas.size(); i++) {
+                    Manga manga = mMangas.get(i);
+                    manga.setCategoriesAsString(manga.categoriesToString());
+                    manga.save();
+                }
+            }
+        });
+        backgroundThread.start();
     }
 
     @Override
@@ -143,9 +149,12 @@ public class HomeActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case (android.R.id.home):
                 Log.e("kaikai", "menu button pressed");
-                if (mMangas != null) {
+                if (mMangas != null && mMangas.size() != 0) {
                     int i = (int) (Math.random()*mMangas.size());
-                    mangaSelected(mMangas.get(i));
+                    onMangaSelected(mMangas.get(i));
+                }
+                else {
+                    Log.e("kaikai", "mMangas is null or size == 0");
                 }
                 return true;
             case (R.id.action_search):
