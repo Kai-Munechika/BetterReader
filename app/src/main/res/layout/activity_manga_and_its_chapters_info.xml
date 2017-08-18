@@ -8,6 +8,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
     android:fitsSystemWindows="false"
+    android:foreground="?android:attr/selectableItemBackground"
     tools:context="com.kaim808.betterreader.activities.MangaAndItsChaptersInfoActivity"
     >
 

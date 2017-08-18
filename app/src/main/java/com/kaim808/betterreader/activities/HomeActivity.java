@@ -5,13 +5,18 @@ import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.kaim808.betterreader.R;
+import com.kaim808.betterreader.etc.HomeAdapter;
+import com.kaim808.betterreader.etc.ItemClickSupport;
 import com.kaim808.betterreader.pojos.Manga;
 import com.kaim808.betterreader.pojos.MangaList;
 import com.kaim808.betterreader.retrofit.MangaEdenApiInterface;
@@ -28,7 +33,7 @@ import retrofit2.Response;
 
 // TODO: Note: it takes around 4 - 4.5 seconds to load
 // TODO: 8/17/17 make persistManga a method that works on a background service rather than thread; the manga saving is disrupted onDestroy()
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements ItemClickSupport.OnItemClickListener{
 
     public static String SELECTED_MANGA_IMAGE_URL = "selected_manga_image_url";
     public static String SELECTED_MANGA_NAME = "selected_manga_name";
@@ -39,7 +44,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private final String testChapterId = "5970b931719a168178337a81";
     private final String testImageUrl = "d6/d644db3bb8647192e4bd66b9bfa5dd73e1fbb6bcd83d39d7b5882438.jpg";
-    private final String testName= "Boku no Hero Academia";
+    private final String testName = "Boku no Hero Academia";
     private final String testMangaId = "541aabc045b9ef49009d69b6";
     private final List<String> testCategories = Arrays.asList("Action", "Science Fiction", "Adventure");
     private final int testStatus = 1;
@@ -47,8 +52,11 @@ public class HomeActivity extends AppCompatActivity {
 
     @BindView(R.id.home_toolbar)
     Toolbar mToolbar;
+    @BindView(R.id.home_recycler_view)
+    RecyclerView mRecyclerView;
 
     List<Manga> mMangas;
+    HomeAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +66,18 @@ public class HomeActivity extends AppCompatActivity {
 
         initializeUi();
         load_mMangas();
+
+        ItemClickSupport.addTo(mRecyclerView).setOnItemClickListener(this);
+    }
+
+    private void mMangasUpdated() {
+        if (mAdapter == null) {
+            HomeAdapter mAdapter = new HomeAdapter(mMangas, this);
+            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+            mRecyclerView.setAdapter(mAdapter);
+        } else {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     private void load_mMangas() {
@@ -68,41 +88,13 @@ public class HomeActivity extends AppCompatActivity {
         } finally {
             if (mMangas == null || mMangas.size() == 0) {
                 makeMangaListCall(RetrofitSingleton.mangaEdenApiInterface);
+            } else {
+                mMangasUpdated();
             }
-            Log.e("kaikai", "mManga successfully loaded");
         }
     }
 
-    private void onMangaSelected(Manga manga) {
-        // pass the id, title, and image url, categories, status, views(hits),
-        final Intent intent = new Intent(this, MangaAndItsChaptersInfoActivity.class);
-        intent.putExtra(SELECTED_MANGA_IMAGE_URL, manga.getImageUrl());
-        intent.putExtra(SELECTED_MANGA_NAME, manga.getTitle());
-        intent.putExtra(SELECTED_MANGA_ID, manga.getMangaId());
-
-        intent.putExtra(SELECTED_MANGA_CATEGORIES, manga.categoriesToString());
-        intent.putExtra(SELECTED_MANGA_STATUS, manga.getFormattedStatus(this));
-        intent.putExtra(SELECTED_MANGA_VIEWS, manga.getFormattedNumViews());
-
-        startActivity(intent);
-    }
-
-    private void initializeUi() {
-        setupSystemUi();
-        setupToolbar();
-    }
-
-    private void setupSystemUi() {
-        MangaAndItsChaptersInfoActivity.setStatusBarTranslucent(true, getWindow());
-        MangaAndItsChaptersInfoActivity.moveLayoutBelowStatusBar(mToolbar, this);
-    }
-    private void setupToolbar() {
-        mToolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.primaryLargeWhiteText));
-        mToolbar.setNavigationIcon(R.drawable.ic_menu);
-        setSupportActionBar(mToolbar);
-    }
-
-    private void makeMangaListCall(final MangaEdenApiInterface apiInterface){
+    private void makeMangaListCall(final MangaEdenApiInterface apiInterface) {
         Log.e("kaikai", "Start time: " + System.currentTimeMillis());
         Call<MangaList> call = apiInterface.getMangaList();
         call.enqueue(new Callback<MangaList>() {
@@ -111,7 +103,7 @@ public class HomeActivity extends AppCompatActivity {
                 Log.e("kaikai", "end time: " + System.currentTimeMillis());
                 MangaList mangaListRoot = response.body();
                 mMangas = mangaListRoot.getMangas();
-
+                mMangasUpdated();
                 persistMangas();
 
             }
@@ -138,6 +130,41 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+        Manga manga = mMangas.get(position);
+        onMangaSelected(manga);
+    }
+    private void onMangaSelected(Manga manga) {
+        // pass the id, title, and image url, categories, status, views(hits),
+        final Intent intent = new Intent(this, MangaAndItsChaptersInfoActivity.class);
+        intent.putExtra(SELECTED_MANGA_IMAGE_URL, manga.getImageUrl());
+        intent.putExtra(SELECTED_MANGA_NAME, manga.getTitle());
+        intent.putExtra(SELECTED_MANGA_ID, manga.getMangaId());
+
+        intent.putExtra(SELECTED_MANGA_CATEGORIES, manga.categoriesToString());
+        intent.putExtra(SELECTED_MANGA_STATUS, manga.getFormattedStatus(this));
+        intent.putExtra(SELECTED_MANGA_VIEWS, manga.getFormattedNumViews());
+
+        startActivity(intent);
+    }
+
+    private void initializeUi() {
+        setupSystemUi();
+        setupToolbar();
+    }
+
+    private void setupSystemUi() {
+        MangaAndItsChaptersInfoActivity.setStatusBarTranslucent(true, getWindow());
+        MangaAndItsChaptersInfoActivity.moveLayoutBelowStatusBar(mToolbar, this);
+    }
+
+    private void setupToolbar() {
+        mToolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.primaryLargeWhiteText));
+        mToolbar.setNavigationIcon(R.drawable.ic_menu);
+        setSupportActionBar(mToolbar);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.home_menu, menu);
@@ -150,10 +177,9 @@ public class HomeActivity extends AppCompatActivity {
             case (android.R.id.home):
                 Log.e("kaikai", "menu button pressed");
                 if (mMangas != null && mMangas.size() != 0) {
-                    int i = (int) (Math.random()*mMangas.size());
+                    int i = (int) (Math.random() * mMangas.size());
                     onMangaSelected(mMangas.get(i));
-                }
-                else {
+                } else {
                     Log.e("kaikai", "mMangas is null or size == 0");
                 }
                 return true;
@@ -165,4 +191,6 @@ public class HomeActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+
 }
