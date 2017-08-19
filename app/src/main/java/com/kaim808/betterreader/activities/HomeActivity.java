@@ -34,6 +34,9 @@ import retrofit2.Response;
 
 // TODO: Note: it takes around 4 - 4.5 seconds to load
 // TODO: 8/17/17 make persistManga a method that works on a background service rather than thread; the manga saving is disrupted onDestroy()
+// TODO: 8/19/17 add placeholder image
+// TODO: 8/19/17 add a splash image https://www.bignerdranch.com/blog/splash-screens-the-right-way/
+
 public class HomeActivity extends AppCompatActivity implements ItemClickSupport.OnItemClickListener{
 
     public static String SELECTED_MANGA_IMAGE_URL = "selected_manga_image_url";
@@ -67,7 +70,6 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
 
         initializeUi();
         load_mMangas();
-        initializeRecyclerView();
 
     }
 
@@ -90,6 +92,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         } else {
             mAdapter.notifyDataSetChanged();
         }
+        initializeRecyclerView();
     }
 
     private void load_mMangas() {

@@ -58,7 +58,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(HomeAdapter.ViewHolder holder, int position) {
         Manga manga = mMangaList.get(position);
-        holder.mangaProgressBar.show();
+        holder.mangaProgressBar.setVisibility(View.VISIBLE);
         ImageLoadingUtilities.loadUrlIntoImageViewAndSetProgressbarVisibility(manga.getImageUrl(), holder.mangaImageView, mContext, holder.mangaProgressBar);
 
     }

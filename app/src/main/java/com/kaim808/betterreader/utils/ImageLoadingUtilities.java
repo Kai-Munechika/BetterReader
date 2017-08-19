@@ -37,7 +37,8 @@ public class ImageLoadingUtilities {
                 .listener(new RequestListener<String, GlideDrawable>() {
                     @Override
                     public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-
+                        // TODO: 8/19/17 populate the imageView with a "image unavailable" kind of placeholder
+                        progressBar.hide();
                         return false;
                     }
 
