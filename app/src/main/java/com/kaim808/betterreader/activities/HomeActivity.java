@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.kaim808.betterreader.R;
+import com.kaim808.betterreader.GridSpacingItemDecoration;
 import com.kaim808.betterreader.etc.HomeAdapter;
 import com.kaim808.betterreader.etc.ItemClickSupport;
 import com.kaim808.betterreader.pojos.Manga;
@@ -66,8 +67,19 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
 
         initializeUi();
         load_mMangas();
+        initializeRecyclerView();
 
+    }
+
+    private void initializeRecyclerView() {
         ItemClickSupport.addTo(mRecyclerView).setOnItemClickListener(this);
+
+        GridLayoutManager layoutManager = (GridLayoutManager) mRecyclerView.getLayoutManager();
+        int span = layoutManager.getSpanCount();
+
+        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.homeGridLayoutSpacing);
+
+        mRecyclerView.addItemDecoration(new GridSpacingItemDecoration(span, spacingInPixels, true));
     }
 
     private void mMangasUpdated() {

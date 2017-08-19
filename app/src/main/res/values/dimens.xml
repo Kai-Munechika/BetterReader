@@ -4,4 +4,5 @@
     <dimen name="mangaDetailsStartMargin">10dp</dimen>
     <dimen name="posterImageStartMargin">8dp</dimen>
     <dimen name="mangaDetailsEndMargin">10dp</dimen>
+    <dimen name="homeGridLayoutSpacing">6dp</dimen>
 </resources>
