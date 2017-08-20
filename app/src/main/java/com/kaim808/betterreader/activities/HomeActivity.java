@@ -36,6 +36,7 @@ import retrofit2.Response;
 // TODO: 8/17/17 make persistManga a method that works on a background service rather than thread; the manga saving is disrupted onDestroy()
 // TODO: 8/19/17 add placeholder image
 // TODO: 8/19/17 add a splash image https://www.bignerdranch.com/blog/splash-screens-the-right-way/
+// TODO: 8/19/17 use an auto resizing textview so that it fits within 2 lines for the manga title, or use ellipses
 
 public class HomeActivity extends AppCompatActivity implements ItemClickSupport.OnItemClickListener{
 

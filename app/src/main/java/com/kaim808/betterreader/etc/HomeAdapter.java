@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.kaim808.betterreader.R;
 import com.kaim808.betterreader.pojos.Manga;
@@ -24,12 +25,16 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
     public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView mangaImageView;
         ContentLoadingProgressBar mangaProgressBar;
+        TextView mangaTitle;
+        TextView mangaViews;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             mangaImageView = (ImageView) itemView.findViewById(R.id.manga_image);
             mangaProgressBar = (ContentLoadingProgressBar) itemView.findViewById(R.id.manga_progress_bar);
+            mangaTitle = (TextView) itemView.findViewById(R.id.manga_title);
+            mangaViews = (TextView) itemView.findViewById(R.id.manga_views);
         }
     }
 
@@ -59,6 +64,8 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
     public void onBindViewHolder(HomeAdapter.ViewHolder holder, int position) {
         Manga manga = mMangaList.get(position);
         holder.mangaProgressBar.setVisibility(View.VISIBLE);
+        holder.mangaTitle.setText(manga.getTitle());
+        holder.mangaViews.setText(manga.getFormattedNumViews());
         ImageLoadingUtilities.loadUrlIntoImageViewAndSetProgressbarVisibility(manga.getImageUrl(), holder.mangaImageView, mContext, holder.mangaProgressBar);
 
     }

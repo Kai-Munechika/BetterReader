@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<!--card view has default elevation >= 1 && <= 2-->
+<android.support.v7.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    >
 
-    <!--card view has default elevation >= 1 && <= 2-->
-    <android.support.v7.widget.CardView
+    <ImageView
+        android:id="@+id/manga_image"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <ImageView
-            android:id="@+id/manga_image"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"/>
-    </android.support.v7.widget.CardView>
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        />
 
     <android.support.v4.widget.ContentLoadingProgressBar
         android:id="@+id/manga_progress_bar"
@@ -24,6 +21,48 @@
         android:indeterminateTint="@color/colorAccent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
+        android:layout_gravity="center"/>
 
-</RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:gravity="bottom"
+        android:elevation="2dp"
+        android:weightSum="100">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="22"
+            android:orientation="vertical"
+            android:background="@color/transparentBlack"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/manga_title"
+                android:textColor="@color/largeWhiteTextOnTransparentBackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="2"
+                android:textSize="18sp"
+                android:layout_marginStart="@dimen/mangaDetailsStartMargin"
+                android:layout_marginEnd="@dimen/mangaDetailsEndMargin"
+
+                />
+            <TextView
+                android:id="@+id/manga_views"
+                android:textColor="@color/normalWhiteTextOnTransparentBackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/mangaDetailsStartMargin"
+                android:layout_marginEnd="@dimen/mangaDetailsEndMargin"
+                />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>
