@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_popular"
+            android:icon="@drawable/ic_popular"
+            android:title="@string/popular"
+            />
+        <item
+            android:id="@+id/nav_hot"
+            android:icon="@drawable/ic_hot"
+            android:title="@string/hot"/>
+        <item
+            android:id="@+id/nav_categories"
+            android:icon="@drawable/ic_genre"
+            android:title="@string/genre"/>
+
+        <item
+            android:title="@string/other"
+            >
+            <menu>
+                <group android:checkableBehavior="single">
+                    <item
+                        android:id="@+id/nav_about"
+                        android:icon="@drawable/ic_about"
+                        android:title="@string/about"/>
+                    <item
+                        android:id="@+id/nav_settings"
+                        android:icon="@drawable/ic_settings"
+                        android:title="@string/settings"/>
+                </group>
+            </menu>
+        </item>
+
+
+    </group>
+
+</menu>

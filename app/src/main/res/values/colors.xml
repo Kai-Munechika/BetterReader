@@ -26,6 +26,7 @@
     <!-- min 68% opacity: b3 = 70% -->
     <color name="primaryDarkNormalWhiteText">#b3ffffff</color>
 
+
     <color name="colorAccent">#e8b303</color>
     <color name="listDivider">#fff</color>
 

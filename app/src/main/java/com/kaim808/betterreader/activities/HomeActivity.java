@@ -3,7 +3,10 @@ package com.kaim808.betterreader.activities;
 import android.content.Intent;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,14 +17,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.kaim808.betterreader.R;
 import com.kaim808.betterreader.GridSpacingItemDecoration;
+import com.kaim808.betterreader.R;
 import com.kaim808.betterreader.etc.HomeAdapter;
 import com.kaim808.betterreader.etc.ItemClickSupport;
 import com.kaim808.betterreader.pojos.Manga;
 import com.kaim808.betterreader.pojos.MangaList;
 import com.kaim808.betterreader.retrofit.MangaEdenApiInterface;
 import com.kaim808.betterreader.retrofit.RetrofitSingleton;
+import com.kaim808.betterreader.utils.ViewMeasurementUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,11 +36,24 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-// TODO: Note: it takes around 4 - 4.5 seconds to load
+// TODO: Note: it takes around 4 - 4.5 seconds to load all ~17k manga
 // TODO: 8/17/17 make persistManga a method that works on a background service rather than thread; the manga saving is disrupted onDestroy()
 // TODO: 8/19/17 add placeholder image
 // TODO: 8/19/17 add a splash image https://www.bignerdranch.com/blog/splash-screens-the-right-way/
 // TODO: 8/19/17 use an auto resizing textview so that it fits within 2 lines for the manga title, or use ellipses
+// TODO: 8/19/17 add a draggable scrollbar indicator
+// TODO: 8/21/17 use endless scrolling instead of loading everything at once
+
+// TODO: 8/21/17 credit categories icons;
+// Icons made by Picol from www.flaticon.com is licensed by CC 3.0 BY
+// https://www.flaticon.com/authors/picol
+// https://www.flaticon.com
+// http://creativecommons.org/licenses/by/3.0/
+
+// TODO: 8/21/17 come up with list of categories
+// TODO: 8/21/17 have toolbar collapse on scroll down, back on scroll up https://guides.codepath.com/android/handling-scrolls-with-coordinatorlayout
+// TODO: 8/21/17 add the drop down for categories
+// TODO: 8/21/17 add the header view
 
 public class HomeActivity extends AppCompatActivity implements ItemClickSupport.OnItemClickListener{
 
@@ -59,6 +76,10 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
     Toolbar mToolbar;
     @BindView(R.id.home_recycler_view)
     RecyclerView mRecyclerView;
+    @BindView(R.id.root_view_group)
+    DrawerLayout mDrawerLayout;
+    @BindView(R.id.navigation_drawer_view)
+    NavigationView mNavigationView;
 
     List<Manga> mMangas;
     HomeAdapter mAdapter;
@@ -98,7 +119,9 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
 
     private void load_mMangas() {
         try {
-            mMangas = Manga.listAll(Manga.class);
+//            mMangas = Manga.listAll(Manga.class);
+//            mMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga where h < ? AND s = ? ORDER BY h DESC LIMIT ?", "1000000", "1",  "20");
+            mMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga where h > ? ORDER BY h DESC LIMIT ?", "1000000", "20");
         } catch (SQLiteException e) {
             e.printStackTrace();
         } finally {
@@ -119,7 +142,6 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
                 Log.e("kaikai", "end time: " + System.currentTimeMillis());
                 MangaList mangaListRoot = response.body();
                 mMangas = mangaListRoot.getMangas();
-                mMangasUpdated();
                 persistMangas();
 
             }
@@ -167,6 +189,12 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
     private void initializeUi() {
         setupSystemUi();
         setupToolbar();
+        setupNavigationDrawer();
+    }
+
+    private void setupNavigationDrawer() {
+        int topPaddingInPixels = ViewMeasurementUtils.getStatusBarHeight(this);
+        mNavigationView.setPadding(0, topPaddingInPixels, 0, 0);
     }
 
     private void setupSystemUi() {
@@ -183,7 +211,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.home_menu, menu);
+        inflater.inflate(R.menu.home_toolbar_menu, menu);
         return true;
     }
 
@@ -192,12 +220,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         switch (item.getItemId()) {
             case (android.R.id.home):
                 Log.e("kaikai", "menu button pressed");
-                if (mMangas != null && mMangas.size() != 0) {
-                    int i = (int) (Math.random() * mMangas.size());
-                    onMangaSelected(mMangas.get(i));
-                } else {
-                    Log.e("kaikai", "mMangas is null or size == 0");
-                }
+                mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
             case (R.id.action_search):
 //                launch a searchable spinner dialog

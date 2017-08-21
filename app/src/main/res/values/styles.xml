@@ -13,6 +13,18 @@
     <style name="chapterSubtitleTextAppearance">
         <item name="android:textSize">18.5sp</item>
     </style>
+    
+    <style name="navigationViewTheme">
+        <item name="android:listDivider">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+        <item name="itemTextColor">@color/white</item>
+        <item name="itemIconTint">@color/white</item>
+
+    </style>
+
+    <!--
+        app:itemTextColor="@color/primaryDarkNormalWhiteText"
+        app:itemIconTint="@color/primaryDarkNormalWhiteText"-->
 
     <!--<style name="Theme.AppCompat.Light.NoActionBar" parent="@style/Theme.AppCompat.Light">-->
         <!--<item name="windowNoTitle">true</item>-->
