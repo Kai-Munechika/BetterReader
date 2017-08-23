@@ -154,6 +154,11 @@ public class Manga extends SugarRecord<Manga> implements MangaInterface{
         return HtmlStringParser.htmlStringToString(getT());
     }
 
+    @Override
+    public Double getLastChapterDate() {
+        return getLd();
+    }
+
     public void setCategoriesAsString(String s) {
         this.categoriesAsString = s;
     }
@@ -185,7 +190,7 @@ public class Manga extends SugarRecord<Manga> implements MangaInterface{
             return this.c;
         }
         // categories as string is saved in our sqlite db
-        return Arrays.asList(this.categoriesAsString.split(", "));
+        return this.categoriesAsString == null ? null : Arrays.asList(this.categoriesAsString.split(", "));
     }
 }
 
@@ -198,6 +203,7 @@ interface MangaInterface {
     String getImageUrl();
     Integer getStatus();
     String getTitle();
+    Double getLastChapterDate();
 
 
 }

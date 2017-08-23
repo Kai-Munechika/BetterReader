@@ -54,6 +54,7 @@ import retrofit2.Response;
 // TODO: 8/21/17 have toolbar collapse on scroll down, back on scroll up https://guides.codepath.com/android/handling-scrolls-with-coordinatorlayout
 // TODO: 8/21/17 add the drop down for categories
 // TODO: 8/21/17 add the header view
+// TODO: 8/22/17 update recently updated icon
 
 public class HomeActivity extends AppCompatActivity implements ItemClickSupport.OnItemClickListener{
 
@@ -82,7 +83,13 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
     NavigationView mNavigationView;
 
     List<Manga> mMangas;
-    HomeAdapter mAdapter;
+    List<Manga> mPopularMangas;
+    List<Manga> mRecentlyUpdatedMangas;
+    List<Manga> mHotMangas;
+    List<Manga> mCategoryMangas;
+
+
+    HomeAdapter mHomeAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,47 +99,83 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
 
         initializeUi();
         load_mMangas();
-
-    }
-
-    private void initializeRecyclerView() {
-        ItemClickSupport.addTo(mRecyclerView).setOnItemClickListener(this);
-
-        GridLayoutManager layoutManager = (GridLayoutManager) mRecyclerView.getLayoutManager();
-        int span = layoutManager.getSpanCount();
-
-        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.homeGridLayoutSpacing);
-
-        mRecyclerView.addItemDecoration(new GridSpacingItemDecoration(span, spacingInPixels, true));
-    }
-
-    private void mMangasUpdated() {
-        if (mAdapter == null) {
-            HomeAdapter mAdapter = new HomeAdapter(mMangas, this);
-            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-            mRecyclerView.setAdapter(mAdapter);
-        } else {
-            mAdapter.notifyDataSetChanged();
-        }
         initializeRecyclerView();
+
+
+    }
+
+    private void initializeUi() {
+        setupSystemUi();
+        setupToolbar();
+        setupNavigationDrawer();
+    }
+    private void setupSystemUi() {
+        MangaAndItsChaptersInfoActivity.setStatusBarTranslucent(true, getWindow());
+        MangaAndItsChaptersInfoActivity.moveLayoutBelowStatusBar(mToolbar, this);
+    }
+    private void setupToolbar() {
+        mToolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.primaryLargeWhiteText));
+        mToolbar.setNavigationIcon(R.drawable.ic_menu);
+        setSupportActionBar(mToolbar);
+    }
+    private void setupNavigationDrawer() {
+        int topPaddingInPixels = ViewMeasurementUtils.getStatusBarHeight(this);
+        mNavigationView.setPadding(0, topPaddingInPixels, 0, 0);
+        setupDrawerContent(mNavigationView);
+    }
+    private void setupDrawerContent(NavigationView navigationView) {
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        selectDrawerItem(menuItem);
+                        return true;
+                    }
+                });
+    }
+    private void selectDrawerItem(MenuItem menuItem) {
+        switch(menuItem.getItemId()) {
+            case R.id.nav_popular:
+                loadPopularMangas();
+                break;
+            case R.id.nav_hot:
+                // load hot
+                break;
+            case R.id.nav_most_recent:
+                loadMostRecentMangas();
+                break;
+            default:
+        }
+
+        menuItem.setChecked(true);
+        setTitle(menuItem.getTitle());
+        mDrawerLayout.closeDrawers();
     }
 
     private void load_mMangas() {
         try {
 //            mMangas = Manga.listAll(Manga.class);
-//            mMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga where h < ? AND s = ? ORDER BY h DESC LIMIT ?", "1000000", "1",  "20");
-            mMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga where h > ? ORDER BY h DESC LIMIT ?", "1000000", "20");
+//            mMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE h < ? AND s = ? ORDER BY h DESC LIMIT ?", "1000000", "1",  "20");
+            mMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE categories_as_string LIKE ? ORDER BY h DESC LIMIT ?", "%Adult%", "20");
         } catch (SQLiteException e) {
             e.printStackTrace();
         } finally {
             if (mMangas == null || mMangas.size() == 0) {
                 makeMangaListCall(RetrofitSingleton.mangaEdenApiInterface);
             } else {
-                mMangasUpdated();
+                on_mMangasUpdated();
             }
         }
     }
-
+    private void on_mMangasUpdated() {
+        if (mHomeAdapter == null) {
+            HomeAdapter mAdapter = new HomeAdapter(mMangas, this);
+            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+            mRecyclerView.setAdapter(mAdapter);
+        } else {
+            mHomeAdapter.notifyDataSetChanged();
+        }
+    }
     private void makeMangaListCall(final MangaEdenApiInterface apiInterface) {
         Log.e("kaikai", "Start time: " + System.currentTimeMillis());
         Call<MangaList> call = apiInterface.getMangaList();
@@ -142,6 +185,10 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
                 Log.e("kaikai", "end time: " + System.currentTimeMillis());
                 MangaList mangaListRoot = response.body();
                 mMangas = mangaListRoot.getMangas();
+
+                // TODO: 8/22/17 figure our how to better coordinate this as the initial manga load
+                on_mMangasUpdated();
+
                 persistMangas();
 
             }
@@ -152,7 +199,6 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
             }
         });
     }
-
     private void persistMangas() {
         Thread backgroundThread = new Thread(new Runnable() {
             @Override
@@ -165,6 +211,49 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
             }
         });
         backgroundThread.start();
+    }
+
+
+
+    private final int initialNumManga = 20;
+    private void loadPopularMangas() {
+        // TODO: 8/22/17 add check to see if the sqlite MANGA table exists
+        if (mPopularMangas == null) {
+            mPopularMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga ORDER BY h DESC LIMIT ?", String.valueOf(initialNumManga));
+        }
+        if (mMangas != null) {
+            mMangas.clear();
+            mMangas.addAll(mPopularMangas);
+        }
+        on_mMangasUpdated();
+    }
+//    private void loadHotMangas() { }
+    private void loadMostRecentMangas() {
+        if (mRecentlyUpdatedMangas == null) {
+            mRecentlyUpdatedMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga ORDER BY ld DESC LIMIT ?", String.valueOf(initialNumManga));
+        }
+        update_mMangasAfterInitialized(mRecentlyUpdatedMangas);
+    }
+//    private void loadCategory(String category) { }
+    private void update_mMangasAfterInitialized(List<Manga> mangas) {
+        if (mMangas != null) {
+            mMangas.clear();
+            mMangas.addAll(mangas);
+        }
+        on_mMangasUpdated();
+    }
+
+
+
+    private void initializeRecyclerView() {
+        ItemClickSupport.addTo(mRecyclerView).setOnItemClickListener(this);
+
+        GridLayoutManager layoutManager = (GridLayoutManager) mRecyclerView.getLayoutManager();
+        int span = layoutManager.getSpanCount();
+
+        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.homeGridLayoutSpacing);
+
+        mRecyclerView.addItemDecoration(new GridSpacingItemDecoration(span, spacingInPixels, true));
     }
 
     @Override
@@ -184,28 +273,6 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         intent.putExtra(SELECTED_MANGA_VIEWS, manga.getFormattedNumViews());
 
         startActivity(intent);
-    }
-
-    private void initializeUi() {
-        setupSystemUi();
-        setupToolbar();
-        setupNavigationDrawer();
-    }
-
-    private void setupNavigationDrawer() {
-        int topPaddingInPixels = ViewMeasurementUtils.getStatusBarHeight(this);
-        mNavigationView.setPadding(0, topPaddingInPixels, 0, 0);
-    }
-
-    private void setupSystemUi() {
-        MangaAndItsChaptersInfoActivity.setStatusBarTranslucent(true, getWindow());
-        MangaAndItsChaptersInfoActivity.moveLayoutBelowStatusBar(mToolbar, this);
-    }
-
-    private void setupToolbar() {
-        mToolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.primaryLargeWhiteText));
-        mToolbar.setNavigationIcon(R.drawable.ic_menu);
-        setSupportActionBar(mToolbar);
     }
 
     @Override
