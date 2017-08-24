@@ -13,7 +13,7 @@
             android:title="@string/hot"/>
         <item
             android:id="@+id/nav_most_recent"
-            android:icon="@drawable/ic_hot"
+            android:icon="@drawable/ic_recently_updated"
             android:title="@string/recently_updated"/>
         <item
             android:id="@+id/nav_categories"

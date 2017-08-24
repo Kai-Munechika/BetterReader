@@ -6,7 +6,7 @@ package com.kaim808.betterreader.pojos;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.kaim808.betterreader.utils.HtmlStringParser;
+import com.kaim808.betterreader.utils.StringParser;
 
 import java.util.List;
 
@@ -210,7 +210,7 @@ public class MangaAndItsChapters {
     }
 
     public String getDescription() {
-        return HtmlStringParser.htmlStringToString(description);
+        return StringParser.htmlStringToString(description);
     }
 
     public void setDescription(String description) {

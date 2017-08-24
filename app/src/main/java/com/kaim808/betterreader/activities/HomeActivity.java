@@ -1,6 +1,8 @@
 package com.kaim808.betterreader.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -42,7 +44,7 @@ import retrofit2.Response;
 // TODO: 8/19/17 add a splash image https://www.bignerdranch.com/blog/splash-screens-the-right-way/
 // TODO: 8/19/17 use an auto resizing textview so that it fits within 2 lines for the manga title, or use ellipses
 // TODO: 8/19/17 add a draggable scrollbar indicator
-// TODO: 8/21/17 use endless scrolling instead of loading everything at once
+// TODO: 8/21/17 use endless scrolling instead of loading everything at once https://github.com/codepath/android_guides/wiki/Endless-Scrolling-with-AdapterViews-and-RecyclerView
 
 // TODO: 8/21/17 credit categories icons;
 // Icons made by Picol from www.flaticon.com is licensed by CC 3.0 BY
@@ -50,11 +52,14 @@ import retrofit2.Response;
 // https://www.flaticon.com
 // http://creativecommons.org/licenses/by/3.0/
 
-// TODO: 8/21/17 come up with list of categories
 // TODO: 8/21/17 have toolbar collapse on scroll down, back on scroll up https://guides.codepath.com/android/handling-scrolls-with-coordinatorlayout
-// TODO: 8/21/17 add the drop down for categories
+
 // TODO: 8/21/17 add the header view
 // TODO: 8/22/17 update recently updated icon
+
+// TODO: 8/23/17 learn how to build a backend using either a cloud or a physical server to host all this data and create an api for it
+// TODO: 8/21/17 add the drop down for categories -- look at expandable list view
+// TODO: 8/23/17 add favorited selection
 
 public class HomeActivity extends AppCompatActivity implements ItemClickSupport.OnItemClickListener{
 
@@ -100,8 +105,6 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         initializeUi();
         load_mMangas();
         initializeRecyclerView();
-
-
     }
 
     private void initializeUi() {
@@ -134,17 +137,22 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
                 });
     }
     private void selectDrawerItem(MenuItem menuItem) {
-        switch(menuItem.getItemId()) {
-            case R.id.nav_popular:
-                loadPopularMangas();
-                break;
-            case R.id.nav_hot:
-                // load hot
-                break;
-            case R.id.nav_most_recent:
-                loadMostRecentMangas();
-                break;
-            default:
+        try {
+            switch(menuItem.getItemId()) {
+                case R.id.nav_popular:
+                    loadPopularMangas();
+                    break;
+                case R.id.nav_hot:
+                    loadHotMangas();
+                    break;
+                case R.id.nav_most_recent:
+                    loadMostRecentMangas();
+                    break;
+                default:
+            }
+        } catch (SQLiteException e) {
+            // Manga table doesn't exist
+            e.printStackTrace();
         }
 
         menuItem.setChecked(true);
@@ -170,7 +178,6 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
     private void on_mMangasUpdated() {
         if (mHomeAdapter == null) {
             HomeAdapter mAdapter = new HomeAdapter(mMangas, this);
-            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
             mRecyclerView.setAdapter(mAdapter);
         } else {
             mHomeAdapter.notifyDataSetChanged();
@@ -188,8 +195,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
 
                 // TODO: 8/22/17 figure our how to better coordinate this as the initial manga load
                 on_mMangasUpdated();
-
-                persistMangas();
+                persistMangasInSqliteAndTitlesInSharedPrefs();
 
             }
 
@@ -199,35 +205,58 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
             }
         });
     }
-    private void persistMangas() {
+    private void persistMangasInSqliteAndTitlesInSharedPrefs() {
         Thread backgroundThread = new Thread(new Runnable() {
             @Override
             public void run() {
+
+                SharedPreferences sharedPrefs = HomeActivity.this.getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPrefs.edit();
+                StringBuilder csvTitlesList = new StringBuilder();
+
                 for (int i = 0; i < mMangas.size(); i++) {
                     Manga manga = mMangas.get(i);
                     manga.setCategoriesAsString(manga.categoriesToString());
                     manga.save();
+                    csvTitlesList.append(manga.getTitle());
+                    csvTitlesList.append(",");
                 }
+
+                editor.putString(TITLES_LIST_KEY, csvTitlesList.toString());
+                editor.apply();
             }
         });
         backgroundThread.start();
     }
 
+    private final String TITLES_LIST_KEY = "titles_list_key";
+    
+    private String[] getTitlesList() {
+        SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
+        String csvList = sharedPrefs.getString(TITLES_LIST_KEY, "");
+        return csvList.split(",");
+    }
 
 
     private final int initialNumManga = 20;
     private void loadPopularMangas() {
-        // TODO: 8/22/17 add check to see if the sqlite MANGA table exists
         if (mPopularMangas == null) {
             mPopularMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga ORDER BY h DESC LIMIT ?", String.valueOf(initialNumManga));
         }
-        if (mMangas != null) {
-            mMangas.clear();
-            mMangas.addAll(mPopularMangas);
-        }
-        on_mMangasUpdated();
+        update_mMangasAfterInitialized(mPopularMangas);
     }
-//    private void loadHotMangas() { }
+    private void loadHotMangas() {
+        if (mHotMangas == null) {
+            // 1 month (30.44 days) = 2629743 seconds
+            Double oneMonthInEpoch = 2629743.0;
+            // 1 week = 604800 seconds
+            Double oneWeekInEpoch = 604800.0;
+            // here, I'm defining "hot" as most popular and updated within the past week
+            Double pastWeekInEpoch = System.currentTimeMillis()/1000 - oneWeekInEpoch;
+            mHotMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE ld > ? ORDER BY h DESC LIMIT ?", String.valueOf(pastWeekInEpoch), String.valueOf(initialNumManga));
+        }
+        update_mMangasAfterInitialized(mHotMangas);
+    }
     private void loadMostRecentMangas() {
         if (mRecentlyUpdatedMangas == null) {
             mRecentlyUpdatedMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga ORDER BY ld DESC LIMIT ?", String.valueOf(initialNumManga));
@@ -244,18 +273,15 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
     }
 
 
-
     private void initializeRecyclerView() {
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         ItemClickSupport.addTo(mRecyclerView).setOnItemClickListener(this);
 
         GridLayoutManager layoutManager = (GridLayoutManager) mRecyclerView.getLayoutManager();
         int span = layoutManager.getSpanCount();
-
         int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.homeGridLayoutSpacing);
-
         mRecyclerView.addItemDecoration(new GridSpacingItemDecoration(span, spacingInPixels, true));
     }
-
     @Override
     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
         Manga manga = mMangas.get(position);
@@ -281,7 +307,6 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         inflater.inflate(R.menu.home_toolbar_menu, menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -290,13 +315,10 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
                 mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
             case (R.id.action_search):
-//                launch a searchable spinner dialog
                 Log.e("kaikai", "search button pressed");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
-
-
 }

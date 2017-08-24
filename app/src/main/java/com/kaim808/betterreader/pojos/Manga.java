@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.kaim808.betterreader.R;
-import com.kaim808.betterreader.utils.HtmlStringParser;
+import com.kaim808.betterreader.utils.StringParser;
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
 
@@ -122,7 +122,7 @@ public class Manga extends SugarRecord<Manga> implements MangaInterface{
     }
 
     public String getT() {
-        return t;
+        return StringParser.htmlStringToString(t);
     }
 
     public void setT(String t) {
@@ -151,7 +151,7 @@ public class Manga extends SugarRecord<Manga> implements MangaInterface{
 
     @Override
     public String getTitle() {
-        return HtmlStringParser.htmlStringToString(getT());
+        return StringParser.URLStringToString(StringParser.htmlStringToString(getT()));
     }
 
     @Override
