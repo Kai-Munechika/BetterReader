@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,12 +24,14 @@ import com.kaim808.betterreader.R;
 import com.kaim808.betterreader.etc.ChapterMetaDataAdapter;
 import com.kaim808.betterreader.etc.ItemClickSupport;
 import com.kaim808.betterreader.pojos.ChapterMetaData;
+import com.kaim808.betterreader.pojos.Manga;
 import com.kaim808.betterreader.pojos.MangaAndItsChapters;
 import com.kaim808.betterreader.pojos.MangaDetails;
 import com.kaim808.betterreader.retrofit.MangaEdenApiInterface;
 import com.kaim808.betterreader.retrofit.RetrofitSingleton;
 import com.kaim808.betterreader.utils.ImageLoadingUtilities;
 import com.kaim808.betterreader.utils.ViewMeasurementUtils;
+import com.orm.SugarRecord;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,7 +45,7 @@ import retrofit2.Response;
 // TODO: 8/9/17 and scrolling scrubber
 // TODO: 8/12/17 animate the fab press, and initialize animation from right-off screen to left
 
-public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
+public class MangaAndItsChaptersInfoActivity extends AppCompatActivity implements View.OnClickListener{
 
     public static String SELECTED_CHAPTER_ID = "selected_chapter_id";
     public static String SELECTED_CHAPTER_SUBTITLE = "selected_chapter_subtitle";
@@ -55,6 +58,8 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
     CollapsingToolbarLayout mCollapsingToolbarLayout;
     @BindView(R.id.chapters_recycler_view)
     RecyclerView mChaptersRecyclerView;
+    @BindView(R.id.fab)
+    FloatingActionButton mFloatingActionButton;
 
     private ChapterMetaData mChapterMetaData;
     private MangaDetails mMangaDetails;
@@ -80,6 +85,7 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         setStatusBarTranslucent(true, getWindow());
         enableUpNavigation(mToolbar, this);
         initializeRecyclerView();
+        setupFab();
     }
 
     private void setupToolbarTitle() {
@@ -94,8 +100,7 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) toolbar.getLayoutParams();
             layoutParams.setMargins(0, ViewMeasurementUtils.getStatusBarHeight(appCompatActivity), 0, 0);
             toolbar.setLayoutParams(layoutParams);
-        }
-        else if (appCompatActivity.findViewById(R.id.root_view_group) instanceof CoordinatorLayout) {
+        } else if (appCompatActivity.findViewById(R.id.root_view_group) instanceof CoordinatorLayout) {
             CollapsingToolbarLayout.LayoutParams layoutParams = (CollapsingToolbarLayout.LayoutParams) toolbar.getLayoutParams();
             layoutParams.setMargins(0, ViewMeasurementUtils.getStatusBarHeight(appCompatActivity), 0, 0);
             toolbar.setLayoutParams(layoutParams);
@@ -190,5 +195,20 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity {
         String views = getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_VIEWS);
 
         return new MangaDetails(mangaImageUrl, title, categories, status, views, "");
+    }
+
+    // TODO: 8/25/17 use this manga object rather than MangaDetails for this activity. Also, persist descriptions regardless of whether the manga's favorited, and the image if it is.
+    Manga manga;
+    private void setupFab() {
+        long mangaOrmId = getIntent().getLongExtra(HomeActivity.ORM_ID, 0);
+        manga = SugarRecord.findById(Manga.class, mangaOrmId);
+        if (manga.isFavorited()) { mFloatingActionButton.setImageDrawable(getDrawable(R.drawable.ic_fav_red)); }
+        mFloatingActionButton.setOnClickListener(this);
+    }
+    @Override
+    public void onClick(View view) {
+        mFloatingActionButton.setImageDrawable(manga.isFavorited() ? getDrawable(R.drawable.ic_fav) : getDrawable(R.drawable.ic_fav_red));
+        manga.setFavorited(!(manga.isFavorited()));
+        manga.save();
     }
 }

@@ -38,38 +38,38 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-// TODO: Note: it takes around 4 - 4.5 seconds to load all ~17k manga
-// TODO: 8/17/17 make persistManga a method that works on a background service rather than thread; the manga saving is disrupted onDestroy()
-// TODO: 8/19/17 add placeholder image
-// TODO: 8/19/17 add a splash image https://www.bignerdranch.com/blog/splash-screens-the-right-way/
-// TODO: 8/19/17 use an auto resizing textview so that it fits within 2 lines for the manga title, or use ellipses
-// TODO: 8/19/17 add a draggable scrollbar indicator
-// TODO: 8/21/17 use endless scrolling instead of loading everything at once https://github.com/codepath/android_guides/wiki/Endless-Scrolling-with-AdapterViews-and-RecyclerView
+// Note: it takes around 4 - 4.5 seconds to load all ~17k manga
 
+/* After mvp stage */
+// TODO: 8/25/17 for favorited, display last chapter date rather than number of views, and "completed" if finished.
+// TODO: 8/21/17 add the drop down for categories -- look at expandable list view; do this after the app is pass mvp stage
+// TODO: 8/21/17 have toolbar collapse on scroll down, back on scroll up https://guides.codepath.com/android/handling-scrolls-with-coordinatorlayout
+// TODO: 8/17/17 make persistManga a method that works on a background service rather than thread; the manga saving is disrupted onDestroy()
+// TODO: 8/19/17 use an auto resizing textview so that it fits within 2 lines for the manga title, or use ellipses
+// TODO: 8/21/17 add the header view
+// TODO: 8/23/17 learn how to build a backend using either a cloud or a physical server to host all this data and create an api for it
 // TODO: 8/21/17 credit categories icons;
 // Icons made by Picol from www.flaticon.com is licensed by CC 3.0 BY
 // https://www.flaticon.com/authors/picol
 // https://www.flaticon.com
 // http://creativecommons.org/licenses/by/3.0/
 
-// TODO: 8/21/17 have toolbar collapse on scroll down, back on scroll up https://guides.codepath.com/android/handling-scrolls-with-coordinatorlayout
-
-// TODO: 8/21/17 add the header view
-// TODO: 8/22/17 update recently updated icon
-
-// TODO: 8/23/17 learn how to build a backend using either a cloud or a physical server to host all this data and create an api for it
-// TODO: 8/21/17 add the drop down for categories -- look at expandable list view
-// TODO: 8/23/17 add favorited selection
+/* Primary todos */
+// TODO: 8/19/17 add placeholder image for loading manga cover arts
+// TODO: 8/19/17 add a splash image https://www.bignerdranch.com/blog/splash-screens-the-right-way/
+// TODO: 8/19/17 add a draggable scrollbar indicator
+// TODO: 8/21/17 use endless scrolling instead of loading everything at once https://github.com/codepath/android_guides/wiki/Endless-Scrolling-with-AdapterViews-and-RecyclerView
 
 public class HomeActivity extends AppCompatActivity implements ItemClickSupport.OnItemClickListener{
 
-    public static String SELECTED_MANGA_IMAGE_URL = "selected_manga_image_url";
-    public static String SELECTED_MANGA_NAME = "selected_manga_name";
-    public static String SELECTED_MANGA_ID = "selected_manga_id";
-    public static String SELECTED_MANGA_CATEGORIES = "selected_manga_categories";
-    public static String SELECTED_MANGA_STATUS = "selected_manga_status";
-    public static String SELECTED_MANGA_VIEWS = "selected_manga_views";
-    private final String TITLES_LIST_KEY = "titles_list_key";
+    public static final String SELECTED_MANGA_IMAGE_URL = "selected_manga_image_url";
+    public static final String SELECTED_MANGA_NAME = "selected_manga_name";
+    public static final String SELECTED_MANGA_ID = "selected_manga_id";
+    public static final String SELECTED_MANGA_CATEGORIES = "selected_manga_categories";
+    public static final String SELECTED_MANGA_STATUS = "selected_manga_status";
+    public static final String SELECTED_MANGA_VIEWS = "selected_manga_views";
+    public static final String TITLES_LIST_KEY = "titles_list_key";
+    public static final String ORM_ID = "ORM_ID";
 
     private final String testChapterId = "5970b931719a168178337a81";
     private final String testImageUrl = "d6/d644db3bb8647192e4bd66b9bfa5dd73e1fbb6bcd83d39d7b5882438.jpg";
@@ -92,6 +92,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
     List<Manga> mPopularMangas;
     List<Manga> mRecentlyUpdatedMangas;
     List<Manga> mHotMangas;
+    List<Manga> mFavoritedMangas;
 
 
     HomeAdapter mHomeAdapter;
@@ -103,14 +104,16 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         ButterKnife.bind(this);
 
         initializeUi();
-        load_mMangas();
-        initializeRecyclerView();
+        initialize_mMangas();
+        // todo: check if user has favorited mangas, if he does, then select that drawerItem. use shared prefs to store whether they have it or not.
+        showFavorites();
     }
 
     private void initializeUi() {
         setupSystemUi();
         setupToolbar();
         setupNavigationDrawer();
+        initializeRecyclerView();
     }
     private void setupSystemUi() {
         MangaAndItsChaptersInfoActivity.setStatusBarTranslucent(true, getWindow());
@@ -148,6 +151,9 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
                 case R.id.nav_most_recent:
                     loadMostRecentMangas();
                     break;
+                case R.id.nav_favorited:
+                    loadFavoritedManga();
+                    break;
                 default:
             }
         } catch (SQLiteException e) {
@@ -160,11 +166,12 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         mDrawerLayout.closeDrawers();
     }
 
-    private void load_mMangas() {
+    private void initialize_mMangas() {
         try {
 //            mMangas = Manga.listAll(Manga.class);
 //            mMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE h < ? AND s = ? ORDER BY h DESC LIMIT ?", "1000000", "1",  "20");
-            mMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE categories_as_string LIKE ? ORDER BY h DESC LIMIT ?", "%Adult%", "20");
+            mMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE categories_as_string LIKE ? ORDER BY h DESC LIMIT ?", "%Comedy%", "20");
+
         } catch (SQLiteException e) {
             e.printStackTrace();
         } finally {
@@ -234,6 +241,11 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         return csvList.split(",");
     }
 
+    private void showFavorites() {
+        int FAVORITED_INDEX = 3;
+        selectDrawerItem(mNavigationView.getMenu().getItem(FAVORITED_INDEX));
+    }
+
 
     private final int initialNumManga = 20;
     private void loadPopularMangas() {
@@ -260,6 +272,21 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         }
         update_mMangasAfterInitialized(mRecentlyUpdatedMangas);
     }
+    private String SQLite_TRUE = "1";
+    private void loadFavoritedManga() {
+        // don't cache since it won't be consistent if the user favorites/unfavorites over at other nav categories(?)
+        mFavoritedMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE favorited = ? LIMIT ?", SQLite_TRUE, String.valueOf(initialNumManga));
+        update_mMangasAfterInitialized(mFavoritedMangas);
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        update favorites in case they favorited/unfavorited something and navigated back to the same list of manga
+        if (mNavigationView.getMenu().findItem(R.id.nav_favorited).isChecked()) {
+            loadFavoritedManga();
+        }
+    }
+
     private void update_mMangasAfterInitialized(List<Manga> mangas) {
         if (mMangas != null) {
             mMangas.clear();
@@ -293,6 +320,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         intent.putExtra(SELECTED_MANGA_CATEGORIES, manga.categoriesToString());
         intent.putExtra(SELECTED_MANGA_STATUS, manga.getFormattedStatus(this));
         intent.putExtra(SELECTED_MANGA_VIEWS, manga.getFormattedNumViews());
+        intent.putExtra(ORM_ID, manga.getId());
 
         startActivity(intent);
     }

@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class Manga extends SugarRecord<Manga> implements MangaInterface{
+public class Manga extends SugarRecord<Manga> implements MangaInterface {
 
     /*
     manga's image ("im"),
@@ -61,6 +61,15 @@ public class Manga extends SugarRecord<Manga> implements MangaInterface{
     private String t;
 
     private String categoriesAsString;
+    private boolean favorited = false;
+
+    public boolean isFavorited() {
+        return favorited;
+    }
+
+    public void setFavorited(boolean favorited) {
+        this.favorited = favorited;
+    }
 
     public Manga() {
     }
