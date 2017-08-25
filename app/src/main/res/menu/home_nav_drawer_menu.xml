@@ -16,9 +16,9 @@
             android:icon="@drawable/ic_recently_updated"
             android:title="@string/recently_updated"/>
         <item
-            android:id="@+id/nav_categories"
-            android:icon="@drawable/ic_genre"
-            android:title="@string/genre"/>
+            android:id="@+id/nav_favorited"
+            android:icon="@drawable/ic_fav"
+            android:title="@string/favorited"/>
 
         <item
             android:title="@string/other"

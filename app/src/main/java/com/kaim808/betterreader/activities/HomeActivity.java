@@ -69,6 +69,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
     public static String SELECTED_MANGA_CATEGORIES = "selected_manga_categories";
     public static String SELECTED_MANGA_STATUS = "selected_manga_status";
     public static String SELECTED_MANGA_VIEWS = "selected_manga_views";
+    private final String TITLES_LIST_KEY = "titles_list_key";
 
     private final String testChapterId = "5970b931719a168178337a81";
     private final String testImageUrl = "d6/d644db3bb8647192e4bd66b9bfa5dd73e1fbb6bcd83d39d7b5882438.jpg";
@@ -91,7 +92,6 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
     List<Manga> mPopularMangas;
     List<Manga> mRecentlyUpdatedMangas;
     List<Manga> mHotMangas;
-    List<Manga> mCategoryMangas;
 
 
     HomeAdapter mHomeAdapter;
@@ -228,9 +228,6 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         });
         backgroundThread.start();
     }
-
-    private final String TITLES_LIST_KEY = "titles_list_key";
-    
     private String[] getTitlesList() {
         SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
         String csvList = sharedPrefs.getString(TITLES_LIST_KEY, "");
@@ -263,7 +260,6 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         }
         update_mMangasAfterInitialized(mRecentlyUpdatedMangas);
     }
-//    private void loadCategory(String category) { }
     private void update_mMangasAfterInitialized(List<Manga> mangas) {
         if (mMangas != null) {
             mMangas.clear();
