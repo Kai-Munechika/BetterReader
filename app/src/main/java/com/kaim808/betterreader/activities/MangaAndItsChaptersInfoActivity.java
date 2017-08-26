@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -86,6 +87,7 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity implement
         enableUpNavigation(mToolbar, this);
         initializeRecyclerView();
         setupFab();
+        initializeSnackbar();
     }
 
     private void setupToolbarTitle() {
@@ -205,8 +207,20 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity implement
         if (manga.isFavorited()) { mFloatingActionButton.setImageDrawable(getDrawable(R.drawable.ic_fav_red)); }
         mFloatingActionButton.setOnClickListener(this);
     }
+    private void initializeSnackbar() {
+        mSnackbar = Snackbar.make(mImageBanner, "", Snackbar.LENGTH_SHORT);
+        mSnackbar.setAction("Ok", new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mSnackbar.dismiss();
+            }
+        });
+    }
+    Snackbar mSnackbar; // initialized in initUi
     @Override
     public void onClick(View view) {
+        mSnackbar.setText(manga.isFavorited() ? getString(R.string.removed_from_favorites) : getString(R.string.added_to_favorites));
+        mSnackbar.show();
         mFloatingActionButton.setImageDrawable(manga.isFavorited() ? getDrawable(R.drawable.ic_fav) : getDrawable(R.drawable.ic_fav_red));
         manga.setFavorited(!(manga.isFavorited()));
         manga.save();
