@@ -90,6 +90,15 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
     private final int testStatus = 1;
     private final int testViews = 3957293;
 
+    private final int POPULAR_INDEX = 0;
+    private final int HOT_INDEX = 1;
+    private final int RECENT_INDEX = 2;
+    private final int FAVORITED_INDEX = 3;
+    private final int ABOUT_INDEX = 4;
+    private final int SETTINGS_INDEX = 5;
+    private final int initialNumManga = 20;
+    private String SQLite_TRUE = "1";
+
     @BindView(R.id.home_toolbar)
     Toolbar mToolbar;
     @BindView(R.id.home_recycler_view)
@@ -107,6 +116,8 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
 
 
     HomeAdapter mHomeAdapter;
+    MenuItem mSearchItem;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,8 +127,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
 
         initializeUi();
         initialize_mMangas();
-        // todo: check if user has favorited mangas, if he does, then select that drawerItem. use shared prefs to store whether they have it or not.
-        showFavorites();
+        showFavoritesIfAvailable();
     }
 
     private void initializeUi() {
@@ -153,21 +163,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
     private void selectDrawerItem(MenuItem menuItem) {
         closeSearchView();
         try {
-            switch(menuItem.getItemId()) {
-                case R.id.nav_popular:
-                    loadPopularMangas();
-                    break;
-                case R.id.nav_hot:
-                    loadHotMangas();
-                    break;
-                case R.id.nav_most_recent:
-                    loadMostRecentMangas();
-                    break;
-                case R.id.nav_favorited:
-                    loadFavoritedManga();
-                    break;
-                default:
-            }
+            load_mMangas(menuItem);
         } catch (SQLiteException e) {
             // Manga table doesn't exist
             e.printStackTrace();
@@ -181,6 +177,39 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         if (mSearchItem != null) {
             mSearchItem.collapseActionView();
         }
+    }
+    // TODO: 8/27/17 figure out how to save the recycler's position as well and scroll back to it on restore. use recycler.computeVerticalOffset and scrollBy
+    private void load_mMangas(MenuItem menuItem) {
+        switch(menuItem.getItemId()) {
+            case R.id.nav_popular:
+                loadPopularMangas();
+                break;
+            case R.id.nav_hot:
+                loadHotMangas();
+                break;
+            case R.id.nav_most_recent:
+                loadMostRecentMangas();
+                break;
+            case R.id.nav_favorited:
+                loadFavoritedManga();
+                break;
+            case R.id.nav_about:
+                update_mMangasAfterInitialized(new ArrayList<Manga>()); // clear it out for now
+                break;
+            case R.id.nav_settings:
+                update_mMangasAfterInitialized(new ArrayList<Manga>()); // clear it out for now
+            default:
+        }
+    }
+    private MenuItem getSelectedNavDrawerMenuItem() {
+        Menu menu = mNavigationView.getMenu();
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem menuItem = menu.getItem(i);
+            if (menuItem.isChecked()) {
+                return menuItem;
+            }
+        }
+        return null;    // should never reach this line, since 1 item will always be checked at all times
     }
 
     private void initialize_mMangas() {
@@ -260,12 +289,15 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         return csvList.split(",");
     }
 
-    private void showFavorites() {
-        int FAVORITED_INDEX = 3;
-        selectDrawerItem(mNavigationView.getMenu().getItem(FAVORITED_INDEX));
+    private void showFavoritesIfAvailable() {
+        if (mMangas != null) {
+            selectDrawerItem(mNavigationView.getMenu().getItem(FAVORITED_INDEX));
+            if (mMangas.size() == 0) {
+                selectDrawerItem(mNavigationView.getMenu().getItem(POPULAR_INDEX));
+            }
+        }
     }
 
-    private final int initialNumManga = 20;
     private void loadPopularMangas() {
         if (mPopularMangas == null) {
             mPopularMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga ORDER BY " + HITS + " DESC LIMIT ?", String.valueOf(initialNumManga));
@@ -289,7 +321,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         }
         update_mMangasAfterInitialized(mRecentlyUpdatedMangas);
     }
-    private String SQLite_TRUE = "1";
+
     private void loadFavoritedManga() {
         // don't cache since it won't be consistent if the user favorites/unfavorites over at other nav categories(?)
         mFavoritedMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE " + FAVORITED + " = ? LIMIT ?", SQLite_TRUE, String.valueOf(initialNumManga));
@@ -297,22 +329,23 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
     }
     private void loadSearchQueriesManga(String searchQuery) {
         if (searchQuery == null || searchQuery.length() == 0) {
-            update_mMangasAfterInitialized(new ArrayList<Manga>());
+            load_mMangas(getSelectedNavDrawerMenuItem());
         }
         else {
             String searchQueryWithWildCards = "%" + searchQuery + "%";
             String minHits = "1";
             List<Manga> searchedMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE " + TITLE + " LIKE ? AND " + HITS + " >= ? LIMIT ?", searchQueryWithWildCards, minHits, String.valueOf(initialNumManga));
-            Log.e(TAG, "size = " + searchedMangas.size());
             update_mMangasAfterInitialized(searchedMangas);
         }
     }
+
     @Override
     protected void onResume() {
         super.onResume();
 //        update favorites in case they favorited/unfavorited something and navigated back to the same list of manga
         if (mNavigationView.getMenu().findItem(R.id.nav_favorited).isChecked()) {
             loadFavoritedManga();
+            closeSearchView();
         }
     }
 
@@ -354,16 +387,14 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         startActivity(intent);
     }
 
-    MenuItem mSearchItem;
-    SearchView mSearchView;
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.home_toolbar_menu, menu);
 
         mSearchItem = menu.findItem(R.id.action_search);
-        mSearchView = (SearchView) MenuItemCompat.getActionView(mSearchItem);
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(mSearchItem);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 toggleKeyboard();
@@ -383,7 +414,6 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         });
         return true;
     }
-
     private void toggleKeyboard() {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
