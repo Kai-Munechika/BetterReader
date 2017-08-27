@@ -8,16 +8,19 @@ import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.kaim808.betterreader.GridSpacingItemDecoration;
 import com.kaim808.betterreader.R;
@@ -29,6 +32,7 @@ import com.kaim808.betterreader.retrofit.MangaEdenApiInterface;
 import com.kaim808.betterreader.retrofit.RetrofitSingleton;
 import com.kaim808.betterreader.utils.ViewMeasurementUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,6 +41,12 @@ import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static com.kaim808.betterreader.pojos.Manga.CATEGORIES_AS_STRING;
+import static com.kaim808.betterreader.pojos.Manga.FAVORITED;
+import static com.kaim808.betterreader.pojos.Manga.HITS;
+import static com.kaim808.betterreader.pojos.Manga.LAST_CHAPTER_DATE;
+import static com.kaim808.betterreader.pojos.Manga.TITLE;
 
 // Note: it takes around 4 - 4.5 seconds to load all ~17k manga
 
@@ -62,6 +72,7 @@ import retrofit2.Response;
 
 public class HomeActivity extends AppCompatActivity implements ItemClickSupport.OnItemClickListener{
 
+    String TAG = HomeActivity.class.getSimpleName();
     public static final String SELECTED_MANGA_IMAGE_URL = "selected_manga_image_url";
     public static final String SELECTED_MANGA_NAME = "selected_manga_name";
     public static final String SELECTED_MANGA_ID = "selected_manga_id";
@@ -140,6 +151,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
                 });
     }
     private void selectDrawerItem(MenuItem menuItem) {
+        closeSearchView();
         try {
             switch(menuItem.getItemId()) {
                 case R.id.nav_popular:
@@ -165,12 +177,18 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         setTitle(menuItem.getTitle());
         mDrawerLayout.closeDrawers();
     }
+    private void closeSearchView() {
+        if (mSearchItem != null) {
+            mSearchItem.collapseActionView();
+        }
+    }
 
     private void initialize_mMangas() {
         try {
 //            mMangas = Manga.listAll(Manga.class);
 //            mMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE h < ? AND s = ? ORDER BY h DESC LIMIT ?", "1000000", "1",  "20");
-            mMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE categories_as_string LIKE ? ORDER BY h DESC LIMIT ?", "%Comedy%", "20");
+            String categoryWithWildCards = "%Comedy%";
+            mMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE " + CATEGORIES_AS_STRING + " LIKE ? ORDER BY " + HITS + " DESC LIMIT ?", categoryWithWildCards, String.valueOf(initialNumManga));
 
         } catch (SQLiteException e) {
             e.printStackTrace();
@@ -191,12 +209,12 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         }
     }
     private void makeMangaListCall(final MangaEdenApiInterface apiInterface) {
-        Log.e("kaikai", "Start time: " + System.currentTimeMillis());
+        Log.e(TAG, "Start time: " + System.currentTimeMillis());
         Call<MangaList> call = apiInterface.getMangaList();
         call.enqueue(new Callback<MangaList>() {
             @Override
             public void onResponse(Call<MangaList> call, Response<MangaList> response) {
-                Log.e("kaikai", "end time: " + System.currentTimeMillis());
+                Log.e(TAG, "end time: " + System.currentTimeMillis());
                 MangaList mangaListRoot = response.body();
                 mMangas = mangaListRoot.getMangas();
 
@@ -212,6 +230,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
             }
         });
     }
+    // TODO: 8/26/17 we might not need to persist list of all titles since we can use sqlite for our search queries. determine whether to persist them or not.
     private void persistMangasInSqliteAndTitlesInSharedPrefs() {
         Thread backgroundThread = new Thread(new Runnable() {
             @Override
@@ -246,37 +265,47 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         selectDrawerItem(mNavigationView.getMenu().getItem(FAVORITED_INDEX));
     }
 
-
     private final int initialNumManga = 20;
     private void loadPopularMangas() {
         if (mPopularMangas == null) {
-            mPopularMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga ORDER BY h DESC LIMIT ?", String.valueOf(initialNumManga));
+            mPopularMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga ORDER BY " + HITS + " DESC LIMIT ?", String.valueOf(initialNumManga));
         }
         update_mMangasAfterInitialized(mPopularMangas);
     }
     private void loadHotMangas() {
         if (mHotMangas == null) {
-            // 1 month (30.44 days) = 2629743 seconds
-            Double oneMonthInEpoch = 2629743.0;
-            // 1 week = 604800 seconds
-            Double oneWeekInEpoch = 604800.0;
-            // here, I'm defining "hot" as most popular and updated within the past week
+            Double oneMonthInEpoch = 2629743.0; // 1 month (30.44 days) = 2629743 seconds
+            Double oneWeekInEpoch = 604800.0;   // 1 week = 604800 seconds
             Double pastWeekInEpoch = System.currentTimeMillis()/1000 - oneWeekInEpoch;
-            mHotMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE ld > ? ORDER BY h DESC LIMIT ?", String.valueOf(pastWeekInEpoch), String.valueOf(initialNumManga));
+
+            // here, I'm defining "hot" as most popular and updated within the past week
+            mHotMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE " + LAST_CHAPTER_DATE + " > ? ORDER BY " + HITS + " DESC LIMIT ?", String.valueOf(pastWeekInEpoch), String.valueOf(initialNumManga));
         }
         update_mMangasAfterInitialized(mHotMangas);
     }
     private void loadMostRecentMangas() {
         if (mRecentlyUpdatedMangas == null) {
-            mRecentlyUpdatedMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga ORDER BY ld DESC LIMIT ?", String.valueOf(initialNumManga));
+            mRecentlyUpdatedMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga ORDER BY " + LAST_CHAPTER_DATE + " DESC LIMIT ?", String.valueOf(initialNumManga));
         }
         update_mMangasAfterInitialized(mRecentlyUpdatedMangas);
     }
     private String SQLite_TRUE = "1";
     private void loadFavoritedManga() {
         // don't cache since it won't be consistent if the user favorites/unfavorites over at other nav categories(?)
-        mFavoritedMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE favorited = ? LIMIT ?", SQLite_TRUE, String.valueOf(initialNumManga));
+        mFavoritedMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE " + FAVORITED + " = ? LIMIT ?", SQLite_TRUE, String.valueOf(initialNumManga));
         update_mMangasAfterInitialized(mFavoritedMangas);
+    }
+    private void loadSearchQueriesManga(String searchQuery) {
+        if (searchQuery == null || searchQuery.length() == 0) {
+            update_mMangasAfterInitialized(new ArrayList<Manga>());
+        }
+        else {
+            String searchQueryWithWildCards = "%" + searchQuery + "%";
+            String minHits = "1";
+            List<Manga> searchedMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE " + TITLE + " LIKE ? AND " + HITS + " >= ? LIMIT ?", searchQueryWithWildCards, minHits, String.valueOf(initialNumManga));
+            Log.e(TAG, "size = " + searchedMangas.size());
+            update_mMangasAfterInitialized(searchedMangas);
+        }
     }
     @Override
     protected void onResume() {
@@ -325,21 +354,50 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         startActivity(intent);
     }
 
+    MenuItem mSearchItem;
+    SearchView mSearchView;
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.home_toolbar_menu, menu);
+
+        mSearchItem = menu.findItem(R.id.action_search);
+        mSearchView = (SearchView) MenuItemCompat.getActionView(mSearchItem);
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                toggleKeyboard();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (mMangas == null) {
+                    return false;
+                }
+                else {
+                    loadSearchQueriesManga(newText);
+                    return true;
+                }
+            }
+        });
         return true;
     }
+
+    private void toggleKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case (android.R.id.home):
-                Log.e("kaikai", "menu button pressed");
+                Log.e(TAG, "menu button pressed");
                 mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
             case (R.id.action_search):
-                Log.e("kaikai", "search button pressed");
+                Log.e(TAG, "search button pressed");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

@@ -31,6 +31,16 @@ public class Manga extends SugarRecord<Manga> implements MangaInterface {
     Notable: everything except alias
 
     */
+    @Ignore public static final String IMAGE_URL = "im";
+    @Ignore public static final String TITLE = "t";
+    @Ignore public static final String ID = "i";
+    @Ignore public static final String ALIAS = "a";
+    @Ignore public static final String STATUS = "s";
+    @Ignore public static final String LAST_CHAPTER_DATE = "ld";
+    @Ignore public static final String HITS = "h";
+    @Ignore public static final String CATEGORIES_AS_STRING = "categories_as_string";
+    @Ignore public static final String FAVORITED = "favorited";
+
 
     @SerializedName("a")
     @Expose
