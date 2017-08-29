@@ -78,6 +78,12 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity implement
         makeMangaAndChaptersCall(RetrofitSingleton.mangaEdenApiInterface, getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_ID));
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mDataAdapter.notifyDataSetChanged();
+    }
+
     /* UI related */
     private void initializeUi() {
         ImageLoadingUtilities.loadUrlIntoImageView(mMangaDetails.getImageUrl(), mImageBanner, this);

@@ -15,7 +15,7 @@
     <string name="settings">Settings</string>
     <string name="other">Other</string>
     <string name="recently_updated">Recently Updated</string>
-    <string name="favorited">Favorited</string>
+    <string name="favorited">Favorites</string>
     <string name="removed_from_favorites">Removed from favorites</string>
     <string name="added_to_favorites">Added to favorites</string>
 </resources>

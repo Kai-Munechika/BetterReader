@@ -2,7 +2,6 @@ package com.kaim808.betterreader.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -129,28 +128,40 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         initialize_mMangas();
         showFavoritesIfAvailable();
     }
+    // TODO: 8/27/17 rather than always reloading favorites, check if the size changed, reload if it did - don't otherwise
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        update favorites in case they favorited/unfavorited something and navigated back to the same list of manga
+        if (mNavigationView.getMenu().findItem(R.id.nav_favorited).isChecked()) {
+            loadFavoritedManga();
+            closeSearchView();
+        }
+    }
 
     private void initializeUi() {
-        setupSystemUi();
-        setupToolbar();
-        setupNavigationDrawer();
+        initializeSystemUi();
+        initializeToolbar();
+        initializeNavigationDrawer();
         initializeRecyclerView();
     }
-    private void setupSystemUi() {
+    private void initializeSystemUi() {
         MangaAndItsChaptersInfoActivity.setStatusBarTranslucent(true, getWindow());
         MangaAndItsChaptersInfoActivity.moveLayoutBelowStatusBar(mToolbar, this);
     }
-    private void setupToolbar() {
+    private void initializeToolbar() {
         mToolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.primaryLargeWhiteText));
         mToolbar.setNavigationIcon(R.drawable.ic_menu);
         setSupportActionBar(mToolbar);
     }
-    private void setupNavigationDrawer() {
+
+    /* nav drawer related */
+    private void initializeNavigationDrawer() {
         int topPaddingInPixels = ViewMeasurementUtils.getStatusBarHeight(this);
         mNavigationView.setPadding(0, topPaddingInPixels, 0, 0);
-        setupDrawerContent(mNavigationView);
+        initializeDrawerContent(mNavigationView);
     }
-    private void setupDrawerContent(NavigationView navigationView) {
+    private void initializeDrawerContent(NavigationView navigationView) {
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
@@ -172,11 +183,6 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         menuItem.setChecked(true);
         setTitle(menuItem.getTitle());
         mDrawerLayout.closeDrawers();
-    }
-    private void closeSearchView() {
-        if (mSearchItem != null) {
-            mSearchItem.collapseActionView();
-        }
     }
     // TODO: 8/27/17 figure out how to save the recycler's position as well and scroll back to it on restore. use recycler.computeVerticalOffset and scrollBy
     private void load_mMangas(MenuItem menuItem) {
@@ -211,7 +217,16 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         }
         return null;    // should never reach this line, since 1 item will always be checked at all times
     }
+    private void showFavoritesIfAvailable() {
+        if (mMangas != null) {
+            selectDrawerItem(mNavigationView.getMenu().getItem(FAVORITED_INDEX));
+            if (mMangas.size() == 0) {
+                selectDrawerItem(mNavigationView.getMenu().getItem(POPULAR_INDEX));
+            }
+        }
+    }
 
+    /* manga structure related */
     private void initialize_mMangas() {
         try {
 //            mMangas = Manga.listAll(Manga.class);
@@ -249,7 +264,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
 
                 // TODO: 8/22/17 figure our how to better coordinate this as the initial manga load
                 on_mMangasUpdated();
-                persistMangasInSqliteAndTitlesInSharedPrefs();
+                persistMangasInSqlite();
 
             }
 
@@ -259,43 +274,19 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
             }
         });
     }
-    // TODO: 8/26/17 we might not need to persist list of all titles since we can use sqlite for our search queries. determine whether to persist them or not.
-    private void persistMangasInSqliteAndTitlesInSharedPrefs() {
+
+    private void persistMangasInSqlite() {
         Thread backgroundThread = new Thread(new Runnable() {
             @Override
             public void run() {
-
-                SharedPreferences sharedPrefs = HomeActivity.this.getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPrefs.edit();
-                StringBuilder csvTitlesList = new StringBuilder();
-
                 for (int i = 0; i < mMangas.size(); i++) {
                     Manga manga = mMangas.get(i);
                     manga.setCategoriesAsString(manga.categoriesToString());
                     manga.save();
-                    csvTitlesList.append(manga.getTitle());
-                    csvTitlesList.append(",");
                 }
-
-                editor.putString(TITLES_LIST_KEY, csvTitlesList.toString());
-                editor.apply();
             }
         });
         backgroundThread.start();
-    }
-    private String[] getTitlesList() {
-        SharedPreferences sharedPrefs = this.getPreferences(Context.MODE_PRIVATE);
-        String csvList = sharedPrefs.getString(TITLES_LIST_KEY, "");
-        return csvList.split(",");
-    }
-
-    private void showFavoritesIfAvailable() {
-        if (mMangas != null) {
-            selectDrawerItem(mNavigationView.getMenu().getItem(FAVORITED_INDEX));
-            if (mMangas.size() == 0) {
-                selectDrawerItem(mNavigationView.getMenu().getItem(POPULAR_INDEX));
-            }
-        }
     }
 
     private void loadPopularMangas() {
@@ -321,7 +312,6 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         }
         update_mMangasAfterInitialized(mRecentlyUpdatedMangas);
     }
-
     private void loadFavoritedManga() {
         // don't cache since it won't be consistent if the user favorites/unfavorites over at other nav categories(?)
         mFavoritedMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE " + FAVORITED + " = ? LIMIT ?", SQLite_TRUE, String.valueOf(initialNumManga));
@@ -339,16 +329,6 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        update favorites in case they favorited/unfavorited something and navigated back to the same list of manga
-        if (mNavigationView.getMenu().findItem(R.id.nav_favorited).isChecked()) {
-            loadFavoritedManga();
-            closeSearchView();
-        }
-    }
-
     private void update_mMangasAfterInitialized(List<Manga> mangas) {
         if (mMangas != null) {
             mMangas.clear();
@@ -357,7 +337,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         on_mMangasUpdated();
     }
 
-
+    /* recycler related */
     private void initializeRecyclerView() {
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         ItemClickSupport.addTo(mRecyclerView).setOnItemClickListener(this);
@@ -387,6 +367,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         startActivity(intent);
     }
 
+    /* searchView related */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -418,7 +399,11 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
     }
-
+    private void closeSearchView() {
+        if (mSearchItem != null) {
+            mSearchItem.collapseActionView();
+        }
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {

@@ -1,6 +1,7 @@
 package com.kaim808.betterreader.etc;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,10 @@ import com.kaim808.betterreader.R;
 import com.kaim808.betterreader.pojos.ChapterMetaData;
 import com.kaim808.betterreader.pojos.MangaDetails;
 import com.kaim808.betterreader.utils.ImageLoadingUtilities;
+
+import static com.kaim808.betterreader.activities.ChapterViewingActivity.PROGRESS_MAX;
+import static com.kaim808.betterreader.activities.ChapterViewingActivity.PROGRESS_VALUE;
+import static com.kaim808.betterreader.activities.ChapterViewingActivity.SHARED_PREFS_FILE_NAME;
 
 /**
  * Created by KaiM on 8/6/17.
@@ -32,11 +37,13 @@ public class ChapterMetaDataAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     private int mProgressBarVisibility = View.VISIBLE;
     private int mDescriptionButtonVisibility = View.INVISIBLE;
+    private SharedPreferences mSharedPreferences;
 
     public ChapterMetaDataAdapter(MangaDetails mangaDetails, Context context) {
         mChapterData = null;
         mMangaDetails = mangaDetails;
         mContext = context;
+        mSharedPreferences = context.getSharedPreferences(SHARED_PREFS_FILE_NAME, Context.MODE_PRIVATE);
     }
 
     public void setChapterData(ChapterMetaData chapterData) {
@@ -69,10 +76,13 @@ public class ChapterMetaDataAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             position -= 1;
             ((VHItem) holder).titleLabel.setText(mChapterData.getChapterTitle(position));
             ((VHItem) holder).chapterNumberLabel.setText(mChapterData.getChapterNumber(position));
-//        int maxProgress = 100;
-//        int currentProgress = 40;
-//        holder.progressBar.setMax(maxProgress);
-//        holder.progressBar.setProgress(currentProgress);
+            String chapterId = mChapterData.getChapterId(position);
+
+            int maxProgress = mSharedPreferences.getInt(chapterId + PROGRESS_MAX, 0);
+            int currentProgress = mSharedPreferences.getInt(chapterId + PROGRESS_VALUE, 0);
+            ((VHItem) holder).progressBar.setMax(maxProgress);
+            ((VHItem) holder).progressBar.setProgress(currentProgress);
+
         } else if (holder instanceof VHHeader) {
             ImageLoadingUtilities.loadUrlIntoImageView(mMangaDetails.getImageUrl(), ((VHHeader) holder).fullPosterImage, mContext);
             ((VHHeader) holder).titleLabel.setText(mMangaDetails.getMangaName());
@@ -115,15 +125,14 @@ public class ChapterMetaDataAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private class VHItem extends RecyclerView.ViewHolder {
         TextView titleLabel;
         TextView chapterNumberLabel;
-//        public ProgressBar progressBar;
+        ProgressBar progressBar;
 
         VHItem(View itemView) {
             super(itemView);
 
             titleLabel = (TextView) itemView.findViewById(R.id.title);
             chapterNumberLabel = (TextView) itemView.findViewById(R.id.chapter_number_label);
-//            progressBar = (ProgressBar) itemView.findViewById(R.id.horizontal_progress_bar);
-//            progressBar.setProgress(0);
+            progressBar = (ProgressBar) itemView.findViewById(R.id.horizontal_progress_bar);
         }
     }
 

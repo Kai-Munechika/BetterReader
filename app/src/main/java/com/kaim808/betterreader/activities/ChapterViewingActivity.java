@@ -1,6 +1,8 @@
 package com.kaim808.betterreader.activities;
 
 import android.animation.ObjectAnimator;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -76,8 +78,12 @@ public class ChapterViewingActivity extends AppCompatActivity {
             | View.SYSTEM_UI_FLAG_FULLSCREEN // hideActivityUi status bar
             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 
+    public final static String SHARED_PREFS_FILE_NAME = "SHARED_PREFS";
+    public final static String PROGRESS_MAX = "PROGRESS_MAX";
+    public final static String PROGRESS_VALUE = "PROGRESS_VALUE";
 
-
+    private String mChapterId;
+    private SharedPreferences mSharedPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,11 +91,26 @@ public class ChapterViewingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chapter_viewing);
         ButterKnife.bind(this);
 
+        mChapterId = getIntent().getStringExtra(MangaAndItsChaptersInfoActivity.SELECTED_CHAPTER_ID);
+        mSharedPrefs = getSharedPreferences(SHARED_PREFS_FILE_NAME, Context.MODE_PRIVATE);
+
         initializeToolbar();
         initializeMainContent();
         initializeBottomUI();
         initializeSystemUi();
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        int currentSeekbarVal = mPageSeekbar.getProgress();
+        int maxSeekbarVal = mPageSeekbar.getMax();
+        if (currentSeekbarVal > 0) {
+            SharedPreferences.Editor editor = mSharedPrefs.edit();
+            editor.putInt(mChapterId + PROGRESS_MAX, maxSeekbarVal);
+            editor.putInt(mChapterId + PROGRESS_VALUE, currentSeekbarVal);
+            editor.apply();
+        }
     }
 
     /* Methods for initializing the system ui */
@@ -150,8 +171,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
     }
 
     private void initializeMainContent() {
-        String chapterId = getIntent().getStringExtra(MangaAndItsChaptersInfoActivity.SELECTED_CHAPTER_ID);
-        makeChapterCall(RetrofitSingleton.mangaEdenApiInterface, chapterId);
+        makeChapterCall(RetrofitSingleton.mangaEdenApiInterface, mChapterId);
 
         // insert space between pages
         int margin = 32;
@@ -265,6 +285,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
                 mPager.setOffscreenPageLimit(5);
 
                 mPageSeekbar.setMax(mImageUrls.length - 1);
+                mPageSeekbar.setProgress(mSharedPrefs.getInt(mChapterId + PROGRESS_VALUE, 0));
                 mPageSeekbar.setEnabled(true);
 
                 hideSystemUi();
