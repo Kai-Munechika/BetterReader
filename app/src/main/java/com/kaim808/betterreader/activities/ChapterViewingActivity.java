@@ -105,7 +105,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
         super.onPause();
         int currentSeekbarVal = mPageSeekbar.getProgress();
         int maxSeekbarVal = mPageSeekbar.getMax();
-        if (currentSeekbarVal > 0) {
+        if (maxSeekbarVal > 0) {
             SharedPreferences.Editor editor = mSharedPrefs.edit();
             editor.putInt(mChapterId + PROGRESS_MAX, maxSeekbarVal);
             editor.putInt(mChapterId + PROGRESS_VALUE, currentSeekbarVal);

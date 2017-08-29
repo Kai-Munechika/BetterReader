@@ -66,6 +66,15 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="0dp"
             />
+
+
+        <com.futuremind.recyclerviewfastscroll.FastScroller
+            android:id="@+id/fast_scroll"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"/>
+
     </FrameLayout>
 
     <android.support.design.widget.FloatingActionButton

@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -21,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.futuremind.recyclerviewfastscroll.FastScroller;
 import com.kaim808.betterreader.R;
 import com.kaim808.betterreader.etc.ChapterMetaDataAdapter;
 import com.kaim808.betterreader.etc.ItemClickSupport;
@@ -170,6 +172,26 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity implement
         mChaptersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mChaptersRecyclerView.setAdapter(mDataAdapter);
         mChaptersRecyclerView.setNestedScrollingEnabled(true);
+        initializeScroller();
+    }
+
+    // TODO: 8/29/17 figure out how prevent the scrollbar from jumping around the header - since it has a different row height
+    private void initializeScroller() {
+        final FastScroller scrollBar = ((FastScroller) findViewById(R.id.fast_scroll));
+        scrollBar.setRecyclerView(mChaptersRecyclerView);
+
+        ((AppBarLayout) findViewById(R.id.app_bar_layout)).addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                boolean isCollapsed = verticalOffset == -appBarLayout.getTotalScrollRange();
+                boolean isExpanded = verticalOffset == 0;
+                if (isExpanded) {
+                    scrollBar.setVisibility(View.INVISIBLE);
+                } else if (isCollapsed) {
+                    scrollBar.setVisibility(View.VISIBLE);
+                }
+            }
+        });
     }
 
     private void updateRecyclerView(MangaAndItsChapters mangaAndItsChapters) {
