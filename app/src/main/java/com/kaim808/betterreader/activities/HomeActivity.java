@@ -95,7 +95,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
     private final int FAVORITED_INDEX = 3;
     private final int ABOUT_INDEX = 4;
     private final int SETTINGS_INDEX = 5;
-    private final int initialNumManga = 20;
+    private final int initialNumManga = 50;
     private String SQLite_TRUE = "1";
 
     @BindView(R.id.home_toolbar)

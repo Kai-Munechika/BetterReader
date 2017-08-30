@@ -1,5 +1,6 @@
 package com.kaim808.betterreader.pojos;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,6 +45,24 @@ public class ChapterMetaData {
 
     public int size() {
         return chapters.size();
+    }
+
+    public ArrayList<String> getChapterIds() {
+        ArrayList<String> chapterIds = new ArrayList<>(chapters.size());
+
+        for (int i = 0; i < chapters.size(); i++) {
+            chapterIds.add(getChapterId(i));
+        }
+        return chapterIds;
+    }
+
+    public ArrayList<String> getChapterTitles() {
+        ArrayList<String> chaptertitles = new ArrayList<>(chapters.size());
+
+        for (int i = 0; i < chapters.size(); i++) {
+            chaptertitles.add(getChapterTitle(i));
+        }
+        return chaptertitles;
     }
 
 

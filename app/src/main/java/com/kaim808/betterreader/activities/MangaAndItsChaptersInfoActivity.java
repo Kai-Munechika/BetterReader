@@ -45,12 +45,13 @@ import retrofit2.Response;
 // TODO: 8/3/17 blur banner image or pull first google image result to replace it
 // TODO: 8/3/17 animate expansion/collapse of description
 // TODO: 8/6/17 add animation to recyclerview item touches
-// TODO: 8/9/17 and scrolling scrubber
 // TODO: 8/12/17 animate the fab press, and initialize animation from right-off screen to left
 
 public class MangaAndItsChaptersInfoActivity extends AppCompatActivity implements View.OnClickListener{
 
-    public static String SELECTED_CHAPTER_ID = "selected_chapter_id";
+    public static final String CHAPTER_IDS = "chapter_ids";
+    public static final String SELECTED_CHAPTER_POSITION = "selected_chapter_position";
+    public static final String CHAPTER_TITLES = "chapter_titles";
     public static String SELECTED_CHAPTER_SUBTITLE = "selected_chapter_subtitle";
 
     @BindView(R.id.image_banner)
@@ -194,7 +195,7 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity implement
         });
     }
 
-    private void updateRecyclerView(MangaAndItsChapters mangaAndItsChapters) {
+    private void updateRecyclerView(final MangaAndItsChapters mangaAndItsChapters) {
         mChapterMetaData = new ChapterMetaData(mangaAndItsChapters.getChapters());
         mDataAdapter.setChapterData(mChapterMetaData);
         mDataAdapter.notifyDataSetChanged();
@@ -205,11 +206,12 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity implement
                     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
                         if (position != ChapterMetaDataAdapter.HEADER_POSITION) {
                             position--;
-                            String chapterId = mChapterMetaData.getChapterId(position);
                             Intent intent = new Intent(MangaAndItsChaptersInfoActivity.this, ChapterViewingActivity.class);
-                            intent.putExtra(SELECTED_CHAPTER_ID, chapterId);
                             intent.putExtra(HomeActivity.SELECTED_MANGA_NAME, mMangaDetails.getMangaName());
-                            intent.putExtra(SELECTED_CHAPTER_SUBTITLE, mChapterMetaData.getChapterTitle(position));
+                            intent.putStringArrayListExtra(CHAPTER_TITLES, mChapterMetaData.getChapterTitles());
+                            intent.putStringArrayListExtra(CHAPTER_IDS, mChapterMetaData.getChapterIds());
+                            intent.putExtra(SELECTED_CHAPTER_POSITION, position);
+
                             startActivity(intent);
                         }
                     }
@@ -245,6 +247,7 @@ public class MangaAndItsChaptersInfoActivity extends AppCompatActivity implement
         });
     }
     Snackbar mSnackbar; // initialized in initUi
+    // onClick for the fab
     @Override
     public void onClick(View view) {
         mSnackbar.setText(manga.isFavorited() ? getString(R.string.removed_from_favorites) : getString(R.string.added_to_favorites));

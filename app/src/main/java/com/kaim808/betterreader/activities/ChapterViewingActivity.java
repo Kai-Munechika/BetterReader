@@ -2,6 +2,7 @@ package com.kaim808.betterreader.activities;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import com.kaim808.betterreader.retrofit.RetrofitSingleton;
 import com.kaim808.betterreader.ui.ViewPagerFixed;
 import com.kaim808.betterreader.utils.ViewMeasurementUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -42,6 +44,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.kaim808.betterreader.activities.MangaAndItsChaptersInfoActivity.CHAPTER_IDS;
+import static com.kaim808.betterreader.activities.MangaAndItsChaptersInfoActivity.CHAPTER_TITLES;
+import static com.kaim808.betterreader.activities.MangaAndItsChaptersInfoActivity.SELECTED_CHAPTER_POSITION;
 import static com.kaim808.betterreader.activities.MangaAndItsChaptersInfoActivity.enableUpNavigation;
 
 // TODO: 8/8/17 next/previous chapter if they try to go to next page at either end; via swipe or button touch
@@ -83,6 +88,9 @@ public class ChapterViewingActivity extends AppCompatActivity {
     public final static String PROGRESS_VALUE = "PROGRESS_VALUE";
 
     private String mChapterId;
+    private ArrayList<String> mChapterIds;
+    private ArrayList<String> mChapterTitles;
+    private int mChapterPosition;
     private SharedPreferences mSharedPrefs;
 
     @Override
@@ -91,7 +99,11 @@ public class ChapterViewingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chapter_viewing);
         ButterKnife.bind(this);
 
-        mChapterId = getIntent().getStringExtra(MangaAndItsChaptersInfoActivity.SELECTED_CHAPTER_ID);
+        mChapterPosition = getIntent().getIntExtra(SELECTED_CHAPTER_POSITION, 0);
+        mChapterIds = getIntent().getStringArrayListExtra(CHAPTER_IDS);
+        mChapterId = mChapterIds.get(mChapterPosition);
+        mChapterTitles = getIntent().getStringArrayListExtra(CHAPTER_TITLES);
+
         mSharedPrefs = getSharedPreferences(SHARED_PREFS_FILE_NAME, Context.MODE_PRIVATE);
 
         initializeToolbar();
@@ -154,7 +166,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
     private void initializeToolbar() {
         enableUpNavigation(mToolbar, this);
         mToolbar.setTitle(getIntent().getStringExtra(HomeActivity.SELECTED_MANGA_NAME));
-        mToolbar.setSubtitle(getIntent().getStringExtra(MangaAndItsChaptersInfoActivity.SELECTED_CHAPTER_SUBTITLE));
+        mToolbar.setSubtitle(mChapterTitles.get(mChapterPosition));
         setSupportActionBar(mToolbar);
 
 //        make overflow icon white
@@ -349,14 +361,39 @@ public class ChapterViewingActivity extends AppCompatActivity {
     private void gotoNextPage(int currentPageNum) {
         if (currentPageNum < mImageUrls.length - 1) {
             mPager.setCurrentItem(currentPageNum + 1);
+        } else if (currentPageNum == mImageUrls.length - 1) {
+            gotoNextChapter();
+        }
+    }
+
+    // note: chapters are in reverse order; newest @ index 0; oldest chapter is at the end
+    private void gotoNextChapter() {
+        if (mChapterPosition > 0) {
+            changeChapter(mChapterPosition - 1);
         }
     }
 
     private void gotoPreviousPage(int currentPageNum) {
         if (currentPageNum > 0) {
             mPager.setCurrentItem(currentPageNum - 1);
+        } else if (currentPageNum == 0) {
+            gotoPreviousChapter();
         }
     }
+
+    private void gotoPreviousChapter() {
+        if (mChapterPosition < mChapterIds.size() - 1) {
+            changeChapter(mChapterPosition + 1);
+        }
+    }
+
+    private void changeChapter(int chapterPosition) {
+        Intent intent = getIntent();
+        intent.putExtra(SELECTED_CHAPTER_POSITION, chapterPosition);
+        finish();
+        startActivity(intent);
+    }
+
 
 
     /* Adapter for our view pager */
