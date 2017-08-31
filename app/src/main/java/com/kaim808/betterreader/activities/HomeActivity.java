@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import com.futuremind.recyclerviewfastscroll.FastScroller;
 import com.kaim808.betterreader.GridSpacingItemDecoration;
 import com.kaim808.betterreader.R;
 import com.kaim808.betterreader.etc.HomeAdapter;
@@ -55,7 +56,7 @@ import static com.kaim808.betterreader.pojos.Manga.TITLE;
 // TODO: 8/21/17 have toolbar collapse on scroll down, back on scroll up https://guides.codepath.com/android/handling-scrolls-with-coordinatorlayout
 // TODO: 8/17/17 make persistManga a method that works on a background service rather than thread; the manga saving is disrupted onDestroy()
 // TODO: 8/19/17 use an auto resizing textview so that it fits within 2 lines for the manga title, or use ellipses
-// TODO: 8/21/17 add the header view
+// TODO: 8/21/17 add the header view for the nav drawer
 // TODO: 8/23/17 learn how to build a backend using either a cloud or a physical server to host all this data and create an api for it
 // TODO: 8/21/17 credit categories icons;
 // Icons made by Picol from www.flaticon.com is licensed by CC 3.0 BY
@@ -340,13 +341,23 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
     /* recycler related */
     private void initializeRecyclerView() {
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        initializeGridSpacing();
+        initializeFastScroller();
         ItemClickSupport.addTo(mRecyclerView).setOnItemClickListener(this);
+    }
 
+    private void initializeGridSpacing() {
         GridLayoutManager layoutManager = (GridLayoutManager) mRecyclerView.getLayoutManager();
         int span = layoutManager.getSpanCount();
         int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.homeGridLayoutSpacing);
         mRecyclerView.addItemDecoration(new GridSpacingItemDecoration(span, spacingInPixels, true));
     }
+
+    private void initializeFastScroller() {
+        FastScroller fastScroller = (FastScroller) findViewById(R.id.fast_scroll);
+        fastScroller.setRecyclerView(mRecyclerView);
+    }
+
     @Override
     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
         Manga manga = mMangas.get(position);

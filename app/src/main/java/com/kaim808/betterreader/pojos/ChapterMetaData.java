@@ -6,7 +6,6 @@ import java.util.List;
 /**
  * Created by KaiM on 8/6/17.
  */
-// TODO: 8/6/17 save and read progress for every chapter. dank.
 // Decorator/wrapper for the <List<List<String>> chapters we get from retrofit
 public class ChapterMetaData {
     private List<List<String>> chapters;
