@@ -27,9 +27,6 @@ import com.kaim808.betterreader.R;
 import com.kaim808.betterreader.etc.HomeAdapter;
 import com.kaim808.betterreader.etc.ItemClickSupport;
 import com.kaim808.betterreader.pojos.Manga;
-import com.kaim808.betterreader.pojos.MangaList;
-import com.kaim808.betterreader.retrofit.MangaEdenApiInterface;
-import com.kaim808.betterreader.retrofit.RetrofitSingleton;
 import com.kaim808.betterreader.utils.ViewMeasurementUtils;
 
 import java.util.ArrayList;
@@ -38,11 +35,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-import static com.kaim808.betterreader.pojos.Manga.CATEGORIES_AS_STRING;
 import static com.kaim808.betterreader.pojos.Manga.FAVORITED;
 import static com.kaim808.betterreader.pojos.Manga.HITS;
 import static com.kaim808.betterreader.pojos.Manga.LAST_CHAPTER_DATE;
@@ -126,7 +119,6 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         ButterKnife.bind(this);
 
         initializeUi();
-        initialize_mMangas();
         showFavoritesIfAvailable();
     }
     // TODO: 8/27/17 rather than always reloading favorites, check if the size changed, reload if it did - don't otherwise
@@ -201,10 +193,10 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
                 loadFavoritedManga();
                 break;
             case R.id.nav_about:
-                update_mMangasAfterInitialized(new ArrayList<Manga>()); // clear it out for now
+                update_mMangas(new ArrayList<Manga>()); // clear it out for now
                 break;
             case R.id.nav_settings:
-                update_mMangasAfterInitialized(new ArrayList<Manga>()); // clear it out for now
+                update_mMangas(new ArrayList<Manga>()); // clear it out for now
             default:
         }
     }
@@ -219,32 +211,12 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
         return null;    // should never reach this line, since 1 item will always be checked at all times
     }
     private void showFavoritesIfAvailable() {
-        if (mMangas != null) {
-            selectDrawerItem(mNavigationView.getMenu().getItem(FAVORITED_INDEX));
-            if (mMangas.size() == 0) {
-                selectDrawerItem(mNavigationView.getMenu().getItem(POPULAR_INDEX));
-            }
+        selectDrawerItem(mNavigationView.getMenu().getItem(FAVORITED_INDEX));
+        if (mMangas.size() == 0) {
+            selectDrawerItem(mNavigationView.getMenu().getItem(POPULAR_INDEX));
         }
     }
 
-    /* manga structure related */
-    private void initialize_mMangas() {
-        try {
-//            mMangas = Manga.listAll(Manga.class);
-//            mMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE h < ? AND s = ? ORDER BY h DESC LIMIT ?", "1000000", "1",  "20");
-            String categoryWithWildCards = "%Comedy%";
-            mMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE " + CATEGORIES_AS_STRING + " LIKE ? ORDER BY " + HITS + " DESC LIMIT ?", categoryWithWildCards, String.valueOf(initialNumManga));
-
-        } catch (SQLiteException e) {
-            e.printStackTrace();
-        } finally {
-            if (mMangas == null || mMangas.size() == 0) {
-                makeMangaListCall(RetrofitSingleton.mangaEdenApiInterface);
-            } else {
-                on_mMangasUpdated();
-            }
-        }
-    }
     private void on_mMangasUpdated() {
         if (mHomeAdapter == null) {
             HomeAdapter mAdapter = new HomeAdapter(mMangas, this);
@@ -253,48 +225,12 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
             mHomeAdapter.notifyDataSetChanged();
         }
     }
-    private void makeMangaListCall(final MangaEdenApiInterface apiInterface) {
-        Log.e(TAG, "Start time: " + System.currentTimeMillis());
-        Call<MangaList> call = apiInterface.getMangaList();
-        call.enqueue(new Callback<MangaList>() {
-            @Override
-            public void onResponse(Call<MangaList> call, Response<MangaList> response) {
-                Log.e(TAG, "end time: " + System.currentTimeMillis());
-                MangaList mangaListRoot = response.body();
-                mMangas = mangaListRoot.getMangas();
-
-                // TODO: 8/22/17 figure our how to better coordinate this as the initial manga load
-                on_mMangasUpdated();
-                persistMangasInSqlite();
-
-            }
-
-            @Override
-            public void onFailure(Call<MangaList> call, Throwable t) {
-
-            }
-        });
-    }
-
-    private void persistMangasInSqlite() {
-        Thread backgroundThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < mMangas.size(); i++) {
-                    Manga manga = mMangas.get(i);
-                    manga.setCategoriesAsString(manga.categoriesToString());
-                    manga.save();
-                }
-            }
-        });
-        backgroundThread.start();
-    }
 
     private void loadPopularMangas() {
         if (mPopularMangas == null) {
             mPopularMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga ORDER BY " + HITS + " DESC LIMIT ?", String.valueOf(initialNumManga));
         }
-        update_mMangasAfterInitialized(mPopularMangas);
+        update_mMangas(mPopularMangas);
     }
     private void loadHotMangas() {
         if (mHotMangas == null) {
@@ -305,18 +241,18 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
             // here, I'm defining "hot" as most popular and updated within the past week
             mHotMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE " + LAST_CHAPTER_DATE + " > ? ORDER BY " + HITS + " DESC LIMIT ?", String.valueOf(pastWeekInEpoch), String.valueOf(initialNumManga));
         }
-        update_mMangasAfterInitialized(mHotMangas);
+        update_mMangas(mHotMangas);
     }
     private void loadMostRecentMangas() {
         if (mRecentlyUpdatedMangas == null) {
             mRecentlyUpdatedMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga ORDER BY " + LAST_CHAPTER_DATE + " DESC LIMIT ?", String.valueOf(initialNumManga));
         }
-        update_mMangasAfterInitialized(mRecentlyUpdatedMangas);
+        update_mMangas(mRecentlyUpdatedMangas);
     }
     private void loadFavoritedManga() {
         // don't cache since it won't be consistent if the user favorites/unfavorites over at other nav categories(?)
         mFavoritedMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE " + FAVORITED + " = ? LIMIT ?", SQLite_TRUE, String.valueOf(initialNumManga));
-        update_mMangasAfterInitialized(mFavoritedMangas);
+        update_mMangas(mFavoritedMangas);
     }
     private void loadSearchQueriesManga(String searchQuery) {
         if (searchQuery == null || searchQuery.length() == 0) {
@@ -326,14 +262,16 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
             String searchQueryWithWildCards = "%" + searchQuery + "%";
             String minHits = "1";
             List<Manga> searchedMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE " + TITLE + " LIKE ? AND " + HITS + " >= ? LIMIT ?", searchQueryWithWildCards, minHits, String.valueOf(initialNumManga));
-            update_mMangasAfterInitialized(searchedMangas);
+            update_mMangas(searchedMangas);
         }
     }
 
-    private void update_mMangasAfterInitialized(List<Manga> mangas) {
+    private void update_mMangas(List<Manga> mangas) {
         if (mMangas != null) {
             mMangas.clear();
             mMangas.addAll(mangas);
+        } else {
+            mMangas = mangas;
         }
         on_mMangasUpdated();
     }

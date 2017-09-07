@@ -20,4 +20,6 @@
     <string name="added_to_favorites">Added to favorites</string>
     <string name="loading_next_chapter">Loading next chapter</string>
     <string name="loading_previous_chapter">Loading previous chapter</string>
+    <string name="zero_percent">0%</string>
+    <string name="loading_mangas">Loading mangas..</string>
 </resources>
