@@ -243,11 +243,12 @@ public class ChapterViewingActivity extends AppCompatActivity {
         showToolbar();
         showBottomUi();
     }
+    int tempDisplacement = 0;     // for demo purposes, use 170
     private void showToolbar() {
         ObjectAnimator.ofFloat(mToolbar, "translationY", ViewMeasurementUtils.getStatusBarHeight(this)).start();
     }
     private void showBottomUi() {
-        ObjectAnimator.ofFloat(mBottomNavigationView, "translationY", -ViewMeasurementUtils.getNavigationBarHeight(this)).start();
+        ObjectAnimator.ofFloat(mBottomNavigationView, "translationY", -(ViewMeasurementUtils.getNavigationBarHeight(this) + tempDisplacement)).start();
     }
 
     private void hideActivityUi() {
@@ -258,7 +259,7 @@ public class ChapterViewingActivity extends AppCompatActivity {
         ObjectAnimator.ofFloat(mToolbar, "y", -(mToolbar.getY() + mToolbar.getHeight())).start();
     }
     private void hideBottomUi() {
-        ObjectAnimator.ofFloat(mBottomNavigationView, "translationY", ViewMeasurementUtils.getNavigationBarHeight(this) + mBottomNavigationView.getHeight()).start();
+        ObjectAnimator.ofFloat(mBottomNavigationView, "translationY", (ViewMeasurementUtils.getNavigationBarHeight(this) + mBottomNavigationView.getHeight())).start();
     }
 
     @Override

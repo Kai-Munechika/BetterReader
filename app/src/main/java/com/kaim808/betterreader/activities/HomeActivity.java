@@ -229,6 +229,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
     private void loadPopularMangas() {
         if (mPopularMangas == null) {
             mPopularMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga ORDER BY " + HITS + " DESC LIMIT ?", String.valueOf(initialNumManga));
+//            mPopularMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE t NOT LIKE 'Pokemon%' ORDER BY " + HITS + " DESC LIMIT ?", String.valueOf(initialNumManga));
         }
         update_mMangas(mPopularMangas);
     }
@@ -240,6 +241,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
 
             // here, I'm defining "hot" as most popular and updated within the past week
             mHotMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE " + LAST_CHAPTER_DATE + " > ? ORDER BY " + HITS + " DESC LIMIT ?", String.valueOf(pastWeekInEpoch), String.valueOf(initialNumManga));
+//            mHotMangas = Manga.findWithQuery(Manga.class, "SELECT * FROM Manga WHERE " + LAST_CHAPTER_DATE + " > ? AND t NOT LIKE 'Noblesse' ORDER BY " + HITS + " DESC LIMIT ?", String.valueOf(pastWeekInEpoch), String.valueOf(initialNumManga));
         }
         update_mMangas(mHotMangas);
     }
@@ -271,7 +273,7 @@ public class HomeActivity extends AppCompatActivity implements ItemClickSupport.
             mMangas.clear();
             mMangas.addAll(mangas);
         } else {
-            mMangas = mangas;
+            mMangas = new ArrayList<>(mangas);  // copy
         }
         on_mMangasUpdated();
     }

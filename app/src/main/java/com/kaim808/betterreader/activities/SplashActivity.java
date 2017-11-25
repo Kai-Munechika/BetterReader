@@ -1,5 +1,8 @@
 package com.kaim808.betterreader.activities;
 
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +14,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.kaim808.betterreader.R;
+import com.kaim808.betterreader.UpdateMangaService;
 import com.kaim808.betterreader.pojos.Manga;
 import com.kaim808.betterreader.pojos.MangaList;
 import com.kaim808.betterreader.retrofit.MangaEdenApiInterface;
@@ -45,6 +49,12 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         if (mangasSaved()) {
+            if (!isJobServiceOn(this, JOB_ID)) {
+                Log.e(TAG, "scheduler starting");
+                startMangaUpdateScheduler();
+            } else {
+                Log.e(TAG, "job service was already on");
+            }
             startHomeActivity();
         } else {
             Manga.deleteAll(Manga.class);   // in case of previously disturbed save
@@ -104,6 +114,39 @@ public class SplashActivity extends AppCompatActivity {
             }
 
         }.execute();
+    }
+
+    private static final int JOB_ID = 7;
+    private void startMangaUpdateScheduler() {
+        JobInfo job = new JobInfo.Builder(JOB_ID, new ComponentName(this, UpdateMangaService.class))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+                .setRequiresCharging(true)
+                .setPeriodic(86_400_000)    // one day in ms
+                .build();
+
+        JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        assert jobScheduler != null;
+        Log.e(TAG, "Job started");
+        jobScheduler.schedule(job);
+    }
+
+    private boolean isJobServiceOn(Context context, int JOB_ID) {
+        JobScheduler scheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE );
+        if (scheduler == null) {
+            return false;
+        }
+
+        boolean hasBeenScheduled = false;
+        List<JobInfo> jobs = scheduler.getAllPendingJobs();
+        for (JobInfo jobInfo : jobs) {
+            Log.e(TAG, "JobInfo: " + jobInfo.getId() + " " + jobInfo.toString());
+            if (jobInfo.getId() == JOB_ID) {
+                hasBeenScheduled = true;
+                break;
+            }
+        }
+
+        return hasBeenScheduled;
     }
 
     private void startHomeActivity() {
